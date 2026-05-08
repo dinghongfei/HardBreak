@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="index.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HardBreak</title>
+  <script type="module" src="/index.js" defer></script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="container-scaler">
+      <!-- 一级提示 -->
+      <h1 id="level-1-tip" class="level-1-tip">喝杯水吧</h1>
+      <!-- 二级提示 -->
+      <p id="level-2-tip" class="level-2-tip">补充水分，清醒头脑</p>
+
+      <!-- 倒计时UI -->
+      <div class="countdown">
+        <!-- 背景圆环 -->
+        <svg class="countdown-circle">
+          <circle cx="112" cy="112" r="90" stroke="rgba(255,255,255,0.5)" stroke-width="8" fill="none" />
+          <!-- 进度圆环 -->
+          <circle cx="112" cy="112" r="90" stroke="#4ade80" stroke-width="8" fill="none"
+            stroke-dasharray="565.4866776461628" stroke-dashoffset="0" stroke-linecap="round"
+            class="countdown-circle-progress" />
+        </svg>
+
+        <!-- 时间文字 -->
+        <div class="countdown-text-box">
+          <span class="countdown-text-box-time">
+            14:56
+          </span>
+          <span className="countdown-text-box-label">剩余时间</span>
+        </div>
+      </div>
+
+      <!-- 休息提示 -->
+      <!-- <div class="rest-text-box">
+        👀 看看远处，让眼睛放松一下
+      </div> -->
+
+      <!-- 不可跳过模式提示 -->
+      <div id="lock-tip" class="lock-tip">
+        <span>&#128274;</span>
+        <span>
+          不可跳过模式已开启
+        </span>
+      </div>
+
+      <!-- 跳过按钮  <span>&#9197;</span> -->
+      <button id="skip-btn" class="skip-btn">
+        跳过休息
+      </button>
+    </div>
+  </div>
+
+</body>
+
+</html>

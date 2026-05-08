@@ -1,0 +1,231 @@
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: #FFFFFF;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+}
+
+html {
+  height: 100vh;
+  /*火狐 选中文字时避免出现蓝色背景*/
+  -moz-user-select: none;
+  /*webkit浏览器 选中文字时避免出现蓝色背景*/
+  -webkit-user-select: none;
+  /*IE10 选中文字时避免出现蓝色背景*/
+  -ms-user-select: none;
+  /*选中文字时避免出现蓝色背景*/
+  user-select: none;
+
+}
+
+body {
+  margin: 0;
+  background: rgba(0, 0, 0, 0.95);
+}
+
+
+.container {
+  width: 100%;
+  height: 100%;
+
+  margin: 0;
+
+  overflow: hidden;
+
+  background-image: linear-gradient(to bottom right, #1c1917, #292524, #451a03);
+
+}
+
+
+.container-scaler {
+  min-height: 100vh;
+  transform: scale(1.0);
+  transform-origin: center;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  position: relative;
+}
+
+
+
+/* 小型笔记本 1366×768 — 不缩放，内容刚好适配 */
+/* 默认即为 scale(1.0)，无需额外 media query */
+
+/* 标准笔记本 1440×900+ */
+@media (min-width: 1440px) and (min-height: 900px) {
+  .container-scaler {
+    transform: scale(1.2);
+  }
+}
+
+/* Full HD 1920×1080 — 最常见的桌面分辨率 */
+@media (min-width: 1920px) and (min-height: 1080px) {
+  .container-scaler {
+    transform: scale(1.5);
+  }
+}
+
+/* QHD / Retina / 4K缩放150% — 2560×1440 */
+@media (min-width: 2560px) and (min-height: 1400px) {
+  .container-scaler {
+    transform: scale(1.8);
+  }
+}
+
+/* 4K原生 / 超宽屏 — 3440×1440 及以上 */
+@media (min-width: 3440px) and (min-height: 1400px) {
+  .container-scaler {
+    transform: scale(2.0);
+  }
+}
+
+/* 5K+ / 双屏 / Super Ultrawide — 5120×1440 及以上 */
+@media (min-width: 5120px) {
+  .container-scaler {
+    transform: scale(2.4);
+  }
+}
+
+
+
+.level-1-tip {
+  font-size: 3rem;/* 48px */
+  line-height: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  letter-spacing: 0.025em;
+
+}
+
+.level-2-tip {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75rem; /* 28px */
+  color: color-mix(in oklab, var(--color-white, #ffffff) 80%, transparent);
+}
+
+
+.countdown {
+  position: relative;
+  width: 14rem; /* 224px */
+  height: 14rem; /* 224px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem; /* 32px */
+  margin-bottom: 2rem; /* 32px */
+}
+
+.countdown-circle {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.countdown-circle-progress {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-duration: 1000ms;
+}
+
+.countdown-text-box {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+.countdown-text-box-time {
+  font-size: 3rem; /* 48px */
+  line-height: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  font-variant-numeric: tabular-nums;
+}
+
+
+.countdown-text-box-label {
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem; /* 20px */
+  color: color-mix(in oklab, var(--color-white, #ffffff) 60%, transparent);
+  margin-top: 0.5rem; /* 8px */
+}
+
+
+.rest-text-box {
+  margin-bottom: 0.5rem; /* 8px */
+}
+
+.lock-tip {
+  font-size: 0.875rem;   /* 14px, text-sm */
+  line-height: 1.25rem;  /* 20px, text-sm */
+  letter-spacing: 0.025em; /* tracking-wide */
+  margin-bottom: 1rem;
+}
+
+.skip-btn {
+  padding-left: 3rem; /* 48px */
+  padding-right: 3rem; /* 48px */
+  padding-top: 1rem; /* 16px */
+  padding-bottom: 1rem; /* 16px */
+  color: color-mix(in oklab, var(--color-white, #ffffff) 30%, transparent);
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.75rem; /* 28px */
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  backdrop-filter: blur(4px);
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  border-width: 2px;
+  border-color: color-mix(in oklab, var(--color-white, #ffffff) 30%, transparent);
+  background-color: color-mix(in oklab, var(--color-white, #ffffff) 10%, transparent);
+  
+
+  cursor: pointer;
+  outline: none;
+
+}
+
+
+.skip-btn:hover {
+  color: color-mix(in oklab, var(--color-white, #ffffff) 80%, transparent);
+  border-color: color-mix(in oklab, var(--color-white, #ffffff) 80%, transparent);
+}
+
+
+
+
+
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #f6f6f6;
+    background-color: #2f2f2f;
+  }
+
+  a:hover {
+    color: #24c8db;
+  }
+
+  input,
+  button {
+    color: #ffffff;
+    background-color: #0f0f0f98;
+  }
+
+  button:active {
+    background-color: #0f0f0f69;
+  }
+}

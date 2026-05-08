@@ -1,0 +1,196 @@
+<!-- src/config.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="config.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>应用配置</title>
+    <script type="module" src="/config.js" defer></script>
+</head>
+<body>
+    <div class="config-container">
+        <!-- 标签头 -->
+        <div class="tab-header">
+            <nav class="tab-nav">
+                <button class="tab-btn active" data-tab="general">常规</button>
+                <!-- <button class="tab-btn" data-tab="tips">休息提示</button> -->
+                <button class="tab-btn" data-tab="about">关于</button>
+            </nav>
+        </div>
+
+        <!-- 常规设置 -->
+        <div class="tab-content active" id="general">
+            <!-- 工作时长滑块 -->
+            <div class="slider-container">
+                <div class="slider-header">
+                    <div class="slider-label">
+                        <span class="setting-icon">🐴</span>
+                        <span>工作时长</span>
+                    </div>
+                    <span class="slider-value" id="workDurationValue">25 分钟</span>
+                </div>
+                <div class="slider-track" id="workSliderTrack">
+                    <div class="slider-fill blue" id="workSliderFill"></div>
+                    <div class="slider-thumb" id="workThumb"></div>
+                </div>
+            </div>
+
+            <!-- 休息时长滑块 -->
+            <div class="slider-container">
+                <div class="slider-header">
+                    <div class="slider-label">
+                        <span class="setting-icon">🚴‍♂️</span>
+                        <span>休息时长</span>
+                    </div>
+                    <span class="slider-value" id="breakDurationValue">5 分钟</span>
+                </div>
+                <div class="slider-track" id="breakSliderTrack">
+                    <div class="slider-fill green" id="breakSliderFill"></div>
+                    <div class="slider-thumb green" id="breakThumb"></div>
+                </div>
+            </div>
+
+            <!-- 时间到提醒 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-icon">🔔</span>
+                    <span class="setting-text">进入休息前提醒</span>
+                </div>
+                <div class="toggle-switch on" id="notifyToggle">
+                    <div class="toggle-knob"></div>
+                </div>
+            </div>
+
+            <!-- 不可跳过休息模式 -->
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-icon">🔒</span>
+                    <span class="setting-text">不可跳过模式</span>
+                </div>
+                <div class="toggle-switch" id="noSkipToggle">
+                    <div class="toggle-knob"></div>
+                </div>
+            </div>
+
+            <!-- 语言设置 -->
+            <!-- <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-icon">🌐</span>
+                    <span class="setting-text">语言</span>
+                </div>
+                <div class="select-wrapper">
+                    <select class="custom-select" id="languageSelect">
+                        <option>简体中文</option>
+                        <option>English</option>
+                        <option>日本語</option>
+                    </select>
+                    <span class="select-arrow">▼</span>
+                </div>
+            </div> -->
+        </div>
+
+        <!-- 休息提示 -->
+        <div class="tab-content" id="tips">
+            <div class="tips-header">
+                <div class="section-title" style="margin-bottom: 0;">
+                    <span class="section-icon">💬</span>
+                    <span>休息提示语</span>
+                </div>
+                <div class="btn-group">
+                    <button class="add-tip-btn" id="addTipBtn">+ 添加</button>
+                    <button class="reset-default-btn" id="resetTipsBtn">重置默认</button>
+                </div>
+            </div>
+
+            <div class="tips-list" id="tipsList">
+                <!-- 提示语卡片 1 -->
+                <div class="tip-card">
+                    <div class="tip-row">
+                        <span class="tip-label">一级提示</span>
+                        <span class="tip-text">Take a Break</span>
+                        <div class="tip-actions">
+                            <button class="icon-btn" title="编辑">✎</button>
+                            <button class="icon-btn danger" title="删除">🗑</button>
+                        </div>
+                    </div>
+                    <div class="tip-row">
+                        <span class="tip-label">二级提示</span>
+                        <span class="tip-text">身体是革命的本钱，休息一下</span>
+                    </div>
+                </div>
+
+                <!-- 提示语卡片 2 -->
+                <div class="tip-card">
+                    <div class="tip-row">
+                        <span class="tip-label">一级提示</span>
+                        <span class="tip-text">Time to Pause</span>
+                        <div class="tip-actions">
+                            <button class="icon-btn" title="编辑">✎</button>
+                            <button class="icon-btn danger" title="删除">🗑</button>
+                        </div>
+                    </div>
+                    <div class="tip-row">
+                        <span class="tip-label">二级提示</span>
+                        <span class="tip-text">站起来活动活动</span>
+                    </div>
+                </div>
+
+                <!-- 提示语卡片 3 -->
+                <div class="tip-card">
+                    <div class="tip-row">
+                        <span class="tip-label">一级提示</span>
+                        <span class="tip-text">Rest Your Eyes</span>
+                        <div class="tip-actions">
+                            <button class="icon-btn" title="编辑">✎</button>
+                            <button class="icon-btn danger" title="删除">🗑</button>
+                        </div>
+                    </div>
+                    <div class="tip-row">
+                        <span class="tip-label">二级提示</span>
+                        <span class="tip-text">让眼睛休息一下</span>
+                    </div>
+                </div>
+
+                <!-- 提示语卡片 4 -->
+                <div class="tip-card">
+                    <div class="tip-row">
+                        <span class="tip-label">一级提示</span>
+                        <span class="tip-text">Stretch Time</span>
+                        <div class="tip-actions">
+                            <button class="icon-btn" title="编辑">✎</button>
+                            <button class="icon-btn danger" title="删除">🗑</button>
+                        </div>
+                    </div>
+                    <div class="tip-row">
+                        <span class="tip-label">二级提示</span>
+                        <span class="tip-text">伸展一下筋骨</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于页面 -->
+        <div class="tab-content" id="about">
+            <div class="section-title">
+                <span class="section-icon">ℹ️</span>
+                <span>关于 HardBreak</span>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-text">版本</span>
+                </div>
+                <span class="setting-value">0.1.0</span>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">
+                    <span class="setting-text">描述</span>
+                </div>
+                <span class="setting-value" style="text-align: left; max-width: 400px;">一款帮助你养成良好工作休息习惯的应用，定时提醒你休息，保护你的健康。</span>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
