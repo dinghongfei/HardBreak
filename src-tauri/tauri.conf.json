@@ -11,6 +11,9 @@
     "withGlobalTauri": true,
     "windows": [
       {
+        "label": "main",
+        "url": "index.html",
+
         "title": "HardBreak",
         "hiddenTitle": true,
         "titleBarStyle": "Transparent",
@@ -30,7 +33,33 @@
 
 
         "center": true,
-        "contentProtected": false,
+        "contentProtected": true,
+        "dragDropEnabled": false
+      },
+      {
+        "label": "config_window",
+        "url": "config.html",
+
+        "title": "HardBreak",
+        "hiddenTitle": true,
+        "titleBarStyle": "Transparent",
+
+        "width": 760,
+        "height": 480,
+        "resizable": false,
+        "fullscreen": false,
+
+        "transparent": false,
+        "decorations": true,
+
+        "visible": false,
+
+        "devtools": false,
+        "alwaysOnTop": false,
+
+
+        "center": true,
+        "contentProtected": true,
         "dragDropEnabled": false
       }
     ],
