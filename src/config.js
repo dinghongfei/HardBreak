@@ -1,5 +1,5 @@
-
-
+const { invoke } = window.__TAURI__.core;
+const { listen } = window.__TAURI__.event;
 
 async function loadDatabase() {
     const Database = window.__TAURI__.sql;
@@ -12,10 +12,9 @@ async function saveSetting(key, value) {
     const db = await loadDatabase();
     await db.execute("UPDATE settings SET value = $1 WHERE key = $2", [String(value), key]);
 
+    // 数据状态更新到后端
+    await syncSettingsToBackend();
 
-    // 配置数据变化，需要通知主窗口，数据变化，主窗口需要重新加载配置
-    window.__TAURI__.event.emit("settings-changed");
-    
 }
 
 
@@ -29,6 +28,23 @@ async function querySettings() {
         settings[row.key] = row.value;
     }
     return settings;
+}
+
+
+async function syncSettingsToBackend() {
+    const settings = await querySettings();
+
+    const backendSettings = {
+        work_duration: parseInt(settings.work_duration) || 25,
+        break_duration: parseInt(settings.break_duration) || 5,
+        notify_before_break: settings.notify_before_break === '1',
+        no_skip_mode: settings.no_skip_mode === '1',
+        first_run: settings.first_run === '1',
+    };
+
+    await invoke('update_settings', { settings: backendSettings });
+
+    return backendSettings;
 }
 
 
@@ -75,26 +91,44 @@ function initSlider(thumb, fill, valueEl, min, max, unit, onDragEnd) {
 
 
 
-
 window.addEventListener("DOMContentLoaded", async () => {
     // 首次运行检测：如果是第一次启动，显示配置窗口并标记为非首次
-    const settings = await querySettings();
+    const settings = await syncSettingsToBackend();
 
-
-    if (settings.first_run === '1') {
-        // 显示当前配置窗口
-        const currentWindow = window.__TAURI__.window.getCurrentWindow();
-        await currentWindow.show();
-        await currentWindow.setFocus();
-        // 标记为非首次，下次不再自动展示
+    if (settings.first_run) {
         await saveSetting('first_run', '0');
     }
+
+    // 启动定时任务
+    await invoke('start_timer_cycle');
+
+    const statusSubtitleEl = document.querySelector('#status-subtitle');
+    const statusLableEl = document.querySelector('#status-label');
+    const statusNumberEl = document.querySelector('#status-number');
+
+    listen('app-state-update', (event) => {
+        console.log('app-state-update', event);
+        const { phase, remaining } = event.payload;
+
+        statusSubtitleEl.textContent = phase === 'work' ? '当前正在工作' : '当前正在休息';
+        statusLableEl.textContent = phase === 'work' ? '距离下一次休息倒计时' : '距离下一次工作倒计时';
+
+
+        const minutes = Math.floor(remaining / 60);
+        const seconds = remaining % 60;
+        statusNumberEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+    })
+
+
+
 
     // 查询数据库设置，带默认兜底
     const workDuration = parseInt(settings.work_duration) || 25;
     const breakDuration = parseInt(settings.break_duration) || 5;
-    const notifyBefore = settings.notify_before_break === '1';
-    const noSkipMode = settings.no_skip_mode === '1';
+    const notifyBeforeBreak = settings.notify_before_break;
+    const noSkipMode = settings.no_skip_mode;
+
 
     // 标签切换
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -129,14 +163,20 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     // 初始化进入休息前提醒开关
     const notifyToggle = document.getElementById('notifyToggle');
-    if (notifyBefore) {
+    if (notifyBeforeBreak) {
         notifyToggle.classList.add('on');
     } else {
         notifyToggle.classList.remove('on');
     }
+
     notifyToggle.addEventListener('click', () => {
-        notifyToggle.classList.toggle('on');
-        saveSetting('notify_before_break', notifyToggle.classList.contains('on') ? '1' : '0');
+        const isOn = notifyToggle.classList.contains('on');
+        if (isOn) {
+            notifyToggle.classList.remove('on');
+        } else {
+            notifyToggle.classList.add('on');
+        }
+        saveSetting('notify_before_break', isOn ? '0' : '1');
     });
 
     // 初始化不可跳过模式开关
@@ -147,8 +187,13 @@ window.addEventListener("DOMContentLoaded", async () => {
         noSkipToggle.classList.remove('on');
     }
     noSkipToggle.addEventListener('click', () => {
-        noSkipToggle.classList.toggle('on');
-        saveSetting('no_skip_mode', noSkipToggle.classList.contains('on') ? '1' : '0');
+        const isOn = noSkipToggle.classList.contains('on');
+        if (isOn) {
+            noSkipToggle.classList.remove('on');
+        } else {
+            noSkipToggle.classList.toggle('on');
+        }
+        saveSetting('no_skip_mode', isOn ? '0' : '1');
     });
 
     // 删除提示语
@@ -228,7 +273,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 
 // 全局禁用所有元素的右键菜单
-window.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
-  return false;
-});
+// window.addEventListener('contextmenu', (e) => {
+//   e.preventDefault();
+//   return false;
+// });

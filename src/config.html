@@ -1,6 +1,7 @@
 <!-- src/config.html -->
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="config.css" />
@@ -8,6 +9,7 @@
     <title>应用配置</title>
     <script type="module" src="/config.js" defer></script>
 </head>
+
 <body>
     <div class="config-container">
         <!-- 标签头 -->
@@ -21,6 +23,34 @@
 
         <!-- 常规设置 -->
         <div class="tab-content active" id="general">
+
+            <div class="status-card">
+                <div class="status-row">
+                    <div class="status-left">
+                        <!-- 呼吸灯 -->
+                        <div class="breathing-light">
+                            <div class="breathing-dot"></div>
+                            <div class="breathing-ring"></div>
+                        </div>
+                        <div>
+                            <h4 class="status-title">运行中</h4>
+                            <p id="status-subtitle" class="status-subtitle">
+                                当前正在工作
+                            </p>
+                        </div>
+                    </div>
+                    <div class="status-right">
+                        <p id="status-label" class="status-label">
+                            距离下一次休息倒计时
+                        </p>
+                        <p id="status-number" class="status-number">
+                            02:00
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- 工作时长滑块 -->
             <div class="slider-container">
                 <div class="slider-header">
@@ -53,9 +83,13 @@
 
             <!-- 时间到提醒 -->
             <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-icon">🔔</span>
-                    <span class="setting-text">进入休息前提醒</span>
+                <div class="setting-label-box">
+                    <div class="setting-label">
+                        <span class="setting-icon">🔔</span>
+                        <span class="setting-text">进入休息前提醒</span>
+                    </div>
+                    <p class="setting-label-tip">开启后，休息前10秒弹窗提醒</p>
+
                 </div>
                 <div class="toggle-switch on" id="notifyToggle">
                     <div class="toggle-knob"></div>
@@ -64,9 +98,12 @@
 
             <!-- 不可跳过休息模式 -->
             <div class="setting-item">
-                <div class="setting-label">
-                    <span class="setting-icon">🔒</span>
-                    <span class="setting-text">不可跳过模式</span>
+                <div class="setting-label-box">
+                    <div class="setting-label">
+                        <span class="setting-icon">🔒</span>
+                        <span class="setting-text">不可跳过模式</span>
+                    </div>
+                    <p class="setting-label-tip">开启后，休息不可跳过</p>
                 </div>
                 <div class="toggle-switch" id="noSkipToggle">
                     <div class="toggle-knob"></div>
@@ -186,11 +223,13 @@
                 <div class="setting-label">
                     <span class="setting-text">描述</span>
                 </div>
-                <span class="setting-value" style="text-align: left; max-width: 400px;">一款帮助你养成良好工作休息习惯的应用，定时提醒你休息，保护你的健康。</span>
+                <span class="setting-value"
+                    style="text-align: left; max-width: 400px;">一款帮助你养成良好工作休息习惯的应用，定时提醒你休息，保护你的健康。</span>
             </div>
         </div>
     </div>
 
-    
+
 </body>
+
 </html>

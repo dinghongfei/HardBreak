@@ -54,7 +54,7 @@
 
         "visible": false,
 
-        "devtools": false,
+        "devtools": true,
         "alwaysOnTop": false,
 
 
