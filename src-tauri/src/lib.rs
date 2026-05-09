@@ -1,4 +1,5 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+use rand::RngExt;
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
 use std::thread;
@@ -11,6 +12,9 @@ use tauri::{
 };
 use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_sql::{Migration, MigrationKind};
+
+// 休息窗口标签前缀（用于标识和批量关闭）
+const BREAK_WINDOW_PREFIX: &str = "break_window_";
 
 // 托盘菜单项 ID
 const CONFIG_SETTING: &str = "config_setting";
@@ -70,6 +74,17 @@ struct TimerState {
     remaining_seconds: Mutex<i32>,
 }
 
+impl Default for TimerState {
+    fn default() -> Self {
+        Self {
+            settings: Mutex::new(AppSettings::default()),
+            running: Mutex::new(false),
+            current_phase: Mutex::new(TimerPhase::Work), // 使用枚举
+            remaining_seconds: Mutex::new(0),
+        }
+    }
+}
+
 // ==================== Tauri 命令 ====================
 
 // 更新配置的命令
@@ -106,7 +121,7 @@ fn start_timer_cycle(app: tauri::AppHandle) {
     // 启动定时器线程
     let app_clone = app.clone();
 
-    let main_window = app_clone.get_webview_window("main");
+    // let main_window = app_clone.get_webview_window("main");
 
     thread::spawn(move || {
         let state = app_clone.state::<TimerState>();
@@ -143,7 +158,6 @@ fn start_timer_cycle(app: tauri::AppHandle) {
             let mut remaining = duration_seconds;
 
             while remaining > 0 {
-                
                 // 检查是否需要停止
                 if !*state.running.lock().unwrap() {
                     return;
@@ -180,7 +194,7 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                     }
                 }
 
-                // println!("{:?} phase: {} seconds remaining", phase, remaining);
+                println!("{:?} phase: {} seconds remaining", phase, remaining);
 
                 thread::sleep(Duration::from_secs(1));
 
@@ -203,21 +217,24 @@ fn start_timer_cycle(app: tauri::AppHandle) {
             }
 
             // 发送事件：根据当前阶段决定显示还是隐藏窗口
-            if let Some(win) = main_window.as_ref() {
-                match phase {
-                    TimerPhase::Work => {
-                        // 工作结束，显示主窗口（开始休息）
-                        let _ = win.show();
-                        let _ = win.set_focus();
-                        let _ = app_clone.emit("break_start", ());
-                    }
-                    TimerPhase::Break => {
-                        // 休息结束，隐藏主窗口（开始工作）
-                        let _ = win.hide();
-                        let _ = app_clone.emit("work_start", ());
-                    }
+            match phase {
+                TimerPhase::Work => {
+                    // 工作结束，显示主窗口（开始休息）
+                    // let _ = win.show();
+                    // let _ = win.set_focus();
+                    // let _ = app_clone.emit("break_start", ());
+
+                    show_break_on_all_monitors(&app_clone);
+                }
+                TimerPhase::Break => {
+                    // 休息结束，隐藏主窗口（开始工作）
+                    // let _ = win.hide();
+                    // let _ = app_clone.emit("work_start", ());
+                    hide_break_on_all_monitors(&app_clone);
                 }
             }
+            // if let Some(win) = main_window.as_ref() {
+            // }
 
             // 阶段结束，切换到下一阶段
             let next_phase = phase.next();
@@ -249,18 +266,12 @@ fn start_timer_cycle(app: tauri::AppHandle) {
 
 #[tauri::command]
 fn hide_main_window(app: tauri::AppHandle) {
+    hide_break_on_all_monitors(&app);
+
     let state = app.state::<TimerState>();
 
     // 强制切换到工作阶段
     *state.current_phase.lock().unwrap() = TimerPhase::Work;
-
-    // 隐藏窗口
-    if let Some(window) = app.get_webview_window("main") {
-        let _ = window.hide();
-    }
-
-    // 通知前端：休息已跳过，开始工作阶段
-    let _ = app.emit("work_start", ());
 }
 
 // #[tauri::command]
@@ -297,7 +308,7 @@ pub fn run() {
     ];
 
     tauri::Builder::default()
-        .plugin(tauri_plugin_single_instance::init(|app, args, cwd| {}))
+        .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations("sqlite:config.db", migrations)
@@ -305,13 +316,11 @@ pub fn run() {
         )
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
-        .manage(TimerState {
-            settings: Mutex::new(AppSettings::default()),
-            running: Mutex::new(false),
-            current_phase: Mutex::new(TimerPhase::Work), // 使用枚举
-            remaining_seconds: Mutex::new(0),
-        })
+        .manage(TimerState::default())
         .setup(|app| {
+            // 创建休息窗口
+            create_break_window_on_all_monitors(app.handle());
+
             // 创建托盘
             create_tray(app)?;
 
@@ -327,6 +336,106 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+// 在所有显示器上显示休息窗口
+fn show_break_on_all_monitors(app: &tauri::AppHandle) {
+    // 获取所有显示器
+    if let Ok(monitors) = app.available_monitors() {
+        for (i, monitor) in monitors.iter().enumerate() {
+            let label = format!("{}{}", BREAK_WINDOW_PREFIX, i);
+            let position = monitor.position();
+            let size = monitor.size();
+
+            // 尝试获取已存在的窗口
+            if let Some(window) = app.get_webview_window(&label) {
+                // 窗口已存在：更新位置/大小（显示器配置可能变化），然后显示
+                let _ = window.set_position(tauri::Position::Physical(tauri::PhysicalPosition::<
+                    i32,
+                > {
+                    x: position.x,
+                    y: position.y,
+                }));
+                let _ = window.set_size(tauri::Size::Physical(tauri::PhysicalSize {
+                    width: size.width,
+                    height: size.height,
+                }));
+                let _ = window.set_fullscreen(true);
+                let _ = window.show();
+                let _ = window.set_focus(); // 确保置顶生效
+            } else {
+                // 窗口不存在：创建新窗口
+                create_break_window(app, &label, *position, *size);
+            }
+        }
+    }
+    // 通知前端：开始工作阶段
+    let _ = app.emit("break_start", ());
+}
+
+// 隐藏所有休息窗口（不销毁，便于下次快速显示）
+fn hide_break_on_all_monitors(app: &tauri::AppHandle) {
+    let windows = app.webview_windows();
+    for (label, window) in windows.iter() {
+        if label.starts_with(BREAK_WINDOW_PREFIX) {
+            let _ = window.hide(); // 隐藏而不是关闭
+        }
+    }
+    // 需要计算下一次要展示的文案,计算index,返回给前端
+
+    let mut rng = rand::rng();
+    let index = rng.random_range(0..10); // 生成 [0, 10) 的随机整数
+
+    // 通知前端：休息已跳过，开始工作阶段
+    let _ = app.emit(
+        "work_start",
+        serde_json::json!({
+            "tips_index": index,
+        }),
+    );
+}
+
+
+fn create_break_window_on_all_monitors(app: &tauri::AppHandle) {
+    // 获取所有显示器
+    if let Ok(monitors) = app.available_monitors() {
+        for (i, monitor) in monitors.iter().enumerate() {
+            let label = format!("{}{}", BREAK_WINDOW_PREFIX, i);
+            let position = monitor.position();
+            let size = monitor.size();
+
+            // 尝试获取已存在的窗口
+            if app.get_webview_window(&label).is_none() {
+                // 窗口不存在：创建新窗口
+                create_break_window(app, &label, *position, *size);
+            }
+        }
+    }
+}
+
+fn create_break_window(
+    app: &tauri::AppHandle,
+    label: &str,
+    position: tauri::PhysicalPosition<i32>,
+    size: tauri::PhysicalSize<u32>,
+) {
+    let _ =
+        tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("index.html".into()))
+            .title("HardBreak")
+            .position(position.x as f64, position.y as f64)
+            .center()
+            .inner_size(size.width as f64, size.height as f64)
+            .fullscreen(true) // fixme 全屏
+            .resizable(false)
+            .transparent(true) //是否透明
+            .decorations(false) // fixme 是否有边框
+            .visible(false)
+            .devtools(false) // fixme 开发模式下显示开发者工具
+            .always_on_top(true) // fixme 是否置顶
+            .skip_taskbar(true)
+            .content_protected(true)
+            .drag_and_drop(false)
+            .build();
 }
 
 fn create_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), tauri::Error> {
@@ -362,6 +471,8 @@ fn main_window_close_event<R: Runtime>(app: &tauri::App<R>) -> Result<(), tauri:
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close(); // 阻止默认的关闭（销毁）行为
                 let _ = main_window_clone.hide(); // 改为隐藏窗口
+
+                // 参考 hide 方法
             }
         });
     }

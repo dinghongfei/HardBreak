@@ -10,33 +10,7 @@
   "app": {
     "withGlobalTauri": true,
     "windows": [
-      {
-        "label": "main",
-        "url": "index.html",
-
-        "title": "HardBreak",
-        "hiddenTitle": true,
-        "titleBarStyle": "Transparent",
-
-        "width": 800,
-        "height": 600,
-        "resizable": false,
-        "fullscreen": true,
-
-        "transparent": true,
-        "decorations": true,
-
-        "visible": false,
-
-        "devtools": true,
-        "alwaysOnTop": true,
-
-
-        "center": true,
-        "contentProtected": true,
-        "dragDropEnabled": false
-      },
-      {
+     {
         "label": "config_window",
         "url": "config.html",
 
@@ -89,3 +63,6 @@
     }
   }
 }
+
+
+

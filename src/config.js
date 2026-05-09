@@ -107,7 +107,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     const statusNumberEl = document.querySelector('#status-number');
 
     listen('app-state-update', (event) => {
-        console.log('app-state-update', event);
         const { phase, remaining } = event.payload;
 
         statusSubtitleEl.textContent = phase === 'work' ? '当前正在工作' : '当前正在休息';
@@ -273,7 +272,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 
 // 全局禁用所有元素的右键菜单
-// window.addEventListener('contextmenu', (e) => {
-//   e.preventDefault();
-//   return false;
-// });
+window.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  return false;
+});

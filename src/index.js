@@ -1,8 +1,6 @@
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 
-const { availableMonitors } = window.__TAURI__.window;
-
 
 async function loadDatabase() {
   const Database = window.__TAURI__.sql;
@@ -28,7 +26,7 @@ async function querySettings() {
 
 
 
-// 提示语列表（纯中文）
+// 提示语列表（纯中文）,增加后,无比修改lib.rs 中计算提示语index的逻辑
 const tips = [
   { primary: '停下来，歇一歇', secondary: '让眼睛和身体都喘口气' },
   { primary: '远眺窗外', secondary: '看看远处的绿色，放松睫状肌' },
@@ -57,9 +55,9 @@ const tipsEn = [
 ];
 
 
-function randomizeTips() {
+function randomizeTips(index) {
   // 随机选择提示语
-  const tip = tips[Math.floor(Math.random() * tips.length)];
+  const tip = tips[index];
   document.querySelector('#level-1-tip').textContent = tip.primary;
   document.querySelector('#level-2-tip').textContent = tip.secondary;
 }
@@ -86,9 +84,6 @@ function resetProgress() {
 
 window.addEventListener("DOMContentLoaded", async () => {
 
-
-  const monitors = await availableMonitors();
-  console.log(monitors);
 
   const timeEl = document.querySelector('.countdown-text-box-time');
   const progressEl = document.querySelector('.countdown-circle-progress');
@@ -125,15 +120,16 @@ window.addEventListener("DOMContentLoaded", async () => {
   })
 
 
-    // 新增：监听配置变更事件
+  // 新增：监听配置变更事件
   listen('break_start', async () => {
 
   });
 
   // 新增：监听配置变更事件
-  listen('work_start', async () => {
+  listen('work_start', async (event) => {
     // 文案重置
-    randomizeTips();
+    const { tips_index } = event.payload;
+    randomizeTips(tips_index);
 
     // 重置进度条
     resetProgress();
@@ -150,7 +146,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 
 // 全局禁用所有元素的右键菜单
-// window.addEventListener('contextmenu', (e) => {
-//   e.preventDefault();
-//   return false;
-// });
+window.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  return false;
+});
