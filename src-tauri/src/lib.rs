@@ -116,12 +116,8 @@ fn start_timer_cycle(app: tauri::AppHandle) {
     // 释放锁
     drop(running);
 
-    // println!("Starting timer cycle...");
-
     // 启动定时器线程
     let app_clone = app.clone();
-
-    // let main_window = app_clone.get_webview_window("main");
 
     thread::spawn(move || {
         let state = app_clone.state::<TimerState>();
@@ -194,20 +190,10 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                     }
                 }
 
-                println!("{:?} phase: {} seconds remaining", phase, remaining);
+                // println!("{:?} phase: {} seconds remaining", phase, remaining);
 
                 thread::sleep(Duration::from_secs(1));
-
-                // 调试输出（每分钟或最后10秒）
-                // if remaining % 60 == 0 || remaining <= 10 {
-                //     println!("{:?} phase: {} seconds remaining", phase, remaining);
-                // }
             }
-
-            // println!(
-            //     "{:?} phase ended, switching to {:?} phase",
-            //     phase, next_phase
-            // );
 
             // ★ 新增：检查阶段是否在倒计时期间被重置
             let current_phase_after_loop = state.current_phase.lock().unwrap().clone();
@@ -219,22 +205,14 @@ fn start_timer_cycle(app: tauri::AppHandle) {
             // 发送事件：根据当前阶段决定显示还是隐藏窗口
             match phase {
                 TimerPhase::Work => {
-                    // 工作结束，显示主窗口（开始休息）
-                    // let _ = win.show();
-                    // let _ = win.set_focus();
-                    // let _ = app_clone.emit("break_start", ());
-
-                    show_break_on_all_monitors(&app_clone);
+                    // 工作结束，显示休息窗口（开始休息）
+                    show_break_window_on_all_monitors(&app_clone);
                 }
                 TimerPhase::Break => {
-                    // 休息结束，隐藏主窗口（开始工作）
-                    // let _ = win.hide();
-                    // let _ = app_clone.emit("work_start", ());
-                    hide_break_on_all_monitors(&app_clone);
+                    // 休息结束，隐藏休息窗口（开始工作）
+                    hide_break_window_on_all_monitors(&app_clone);
                 }
             }
-            // if let Some(win) = main_window.as_ref() {
-            // }
 
             // 阶段结束，切换到下一阶段
             let next_phase = phase.next();
@@ -265,34 +243,14 @@ fn start_timer_cycle(app: tauri::AppHandle) {
 // }
 
 #[tauri::command]
-fn hide_main_window(app: tauri::AppHandle) {
-    hide_break_on_all_monitors(&app);
+fn hide_break_window(app: tauri::AppHandle) {
+    hide_break_window_on_all_monitors(&app);
 
     let state = app.state::<TimerState>();
 
     // 强制切换到工作阶段
     *state.current_phase.lock().unwrap() = TimerPhase::Work;
 }
-
-// #[tauri::command]
-// fn show_main_window(app: tauri::AppHandle) {
-//     if let Some(window) = app.get_webview_window("main") {
-//         let _ = window.show();
-//         let _ = window.set_focus();
-//         // 通知前端：窗口已展示，刷新提示语
-//         let _ = app.emit("show_main_window", ()).unwrap();
-//     }
-// }
-
-// #[tauri::command]
-// fn send_break_notification(app: tauri::AppHandle) {
-//     let _ = app
-//         .notification()
-//         .builder()
-//         .title("HardBreak")
-//         .body("10秒后进入休息，请做好准备")
-//         .show();
-// }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -332,14 +290,14 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             update_settings,
             start_timer_cycle,
-            hide_main_window,
+            hide_break_window,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 // 在所有显示器上显示休息窗口
-fn show_break_on_all_monitors(app: &tauri::AppHandle) {
+fn show_break_window_on_all_monitors(app: &tauri::AppHandle) {
     // 获取所有显示器
     if let Ok(monitors) = app.available_monitors() {
         for (i, monitor) in monitors.iter().enumerate() {
@@ -374,7 +332,7 @@ fn show_break_on_all_monitors(app: &tauri::AppHandle) {
 }
 
 // 隐藏所有休息窗口（不销毁，便于下次快速显示）
-fn hide_break_on_all_monitors(app: &tauri::AppHandle) {
+fn hide_break_window_on_all_monitors(app: &tauri::AppHandle) {
     let windows = app.webview_windows();
     for (label, window) in windows.iter() {
         if label.starts_with(BREAK_WINDOW_PREFIX) {
@@ -394,7 +352,6 @@ fn hide_break_on_all_monitors(app: &tauri::AppHandle) {
         }),
     );
 }
-
 
 fn create_break_window_on_all_monitors(app: &tauri::AppHandle) {
     // 获取所有显示器

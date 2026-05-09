@@ -2,30 +2,6 @@ const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 
 
-async function loadDatabase() {
-  const Database = window.__TAURI__.sql;
-
-  const db = await Database.load("sqlite:config.db");
-  return db;
-}
-
-async function querySettings() {
-  const db = await loadDatabase();
-  const rows = await db.select("select key, value from settings");
-
-  // 将数组转换为对象: { work_duration: '25', break_duration: '5', ... }
-  const settings = {};
-  for (const row of rows) {
-    settings[row.key] = row.value;
-  }
-  return settings;
-}
-
-
-
-
-
-
 // 提示语列表（纯中文）,增加后,无比修改lib.rs 中计算提示语index的逻辑
 const tips = [
   { primary: '停下来，歇一歇', secondary: '让眼睛和身体都喘口气' },
@@ -137,8 +113,8 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 
   document.querySelector("#skip-btn").addEventListener("click", () => {
-    // 跳过时，清除主窗口定时器
-    invoke("hide_main_window");
+    // 跳过时，清除主窗口定时器 
+    invoke("hide_break_window");
   });
 
 
