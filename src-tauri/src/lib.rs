@@ -51,6 +51,7 @@ struct AppSettings {
     notify_before_break: bool,
     no_skip_mode: bool,
     first_run: bool,
+    language: String,
 }
 
 impl Default for AppSettings {
@@ -61,20 +62,21 @@ impl Default for AppSettings {
             notify_before_break: true,
             no_skip_mode: false,
             first_run: false,
+            language: "zh-CN".to_string(),
         }
     }
 }
 
 // ==================== 定时器状态 ====================
 
-struct TimerState {
+struct AppState {
     settings: Mutex<AppSettings>,
     running: Mutex<bool>,
     current_phase: Mutex<TimerPhase>, // 使用枚举，避免魔法值
     remaining_seconds: Mutex<i32>,
 }
 
-impl Default for TimerState {
+impl Default for AppState {
     fn default() -> Self {
         Self {
             settings: Mutex::new(AppSettings::default()),
@@ -85,13 +87,62 @@ impl Default for TimerState {
     }
 }
 
+#[derive(Clone, Debug)]
+struct I18nTexts {
+    // 托盘菜单
+    tray_menu_config: String,
+    tray_menu_quit: String,
+
+    // 通知
+    notification_title: String,
+    notification_body: String,
+}
+
+impl I18nTexts {
+    fn new(language: &str) -> Self {
+        match language {
+            "zh-CN" => Self {
+                tray_menu_config: "配置".to_string(),
+                tray_menu_quit: "退出".to_string(),
+                notification_title: "HardBreak".to_string(),
+                notification_body: "10秒后进入休息，请做好准备".to_string(),
+            },
+            "zh-TW" => Self {
+                tray_menu_config: "配置".to_string(),
+                tray_menu_quit: "退出".to_string(),
+                notification_title: "HardBreak".to_string(),
+                notification_body: "10秒後進入休息，請做好準備".to_string(),
+            },
+            "en" => Self {
+                tray_menu_config: "Setting".to_string(),
+                tray_menu_quit: "Quit".to_string(),
+                notification_title: "HardBreak".to_string(),
+                notification_body: "Rest in 10 seconds, please prepare".to_string(),
+            },
+            _ => Self {
+                tray_menu_config: "Setting".to_string(),
+                tray_menu_quit: "Quit".to_string(),
+                notification_title: "HardBreak".to_string(),
+                notification_body: "Rest in 10 seconds, please prepare".to_string(),
+            },
+        }
+    }
+}
+
 // ==================== Tauri 命令 ====================
 
 // 更新配置的命令
 #[tauri::command]
-fn update_settings(app: tauri::AppHandle, window: tauri::WebviewWindow, settings: AppSettings) {
-    let state = app.state::<TimerState>();
-    let first_run = settings.first_run;
+fn update_settings(
+    app: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+    settings: AppSettings,
+) -> Result<(), String> {
+    let state = app.state::<AppState>();
+    let first_run = settings.first_run.clone();
+    let current_language = state.settings.lock().unwrap().language.clone();
+    let new_language = settings.language.clone();
+
     *state.settings.lock().unwrap() = settings;
 
     // 如果是第一次，弹出
@@ -99,12 +150,38 @@ fn update_settings(app: tauri::AppHandle, window: tauri::WebviewWindow, settings
         let _ = window.show();
         let _ = window.set_focus();
     }
+
+    if current_language != new_language {
+        if let Some(tray) = app.tray_by_id("tray_icon") {
+            let tray_clone = tray.clone();
+
+            let i18n: I18nTexts = get_i18n_texts(app.app_handle());
+
+            let config_setting_i = MenuItem::with_id(
+                &app,
+                CONFIG_SETTING,
+                i18n.tray_menu_config,
+                true,
+                None::<&str>,
+            )
+            .map_err(|e| e.to_string())?;
+            let quit_i = MenuItem::with_id(&app, QUIT_APP, i18n.tray_menu_quit, true, None::<&str>)
+                .map_err(|e| e.to_string())?;
+
+            let menu =
+                Menu::with_items(&app, &[&config_setting_i, &quit_i]).map_err(|e| e.to_string())?;
+
+            let _ = tray_clone.set_menu(Some(menu));
+        }
+    }
+
+    Ok(())
 }
 
 // 启动定时器循环
 #[tauri::command]
 fn start_timer_cycle(app: tauri::AppHandle) {
-    let state = app.state::<TimerState>();
+    let state = app.state::<AppState>();
 
     // 防止重复启动
     let mut running = state.running.lock().unwrap();
@@ -120,7 +197,7 @@ fn start_timer_cycle(app: tauri::AppHandle) {
     let app_clone = app.clone();
 
     thread::spawn(move || {
-        let state = app_clone.state::<TimerState>();
+        let state = app_clone.state::<AppState>();
 
         // 初始为工作状态
         *state.current_phase.lock().unwrap() = TimerPhase::Work;
@@ -177,6 +254,7 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                         "duration": duration_seconds,
                         "remaining": remaining,
                         "no_skip_mode": state.settings.lock().unwrap().no_skip_mode,
+                        "current_language": state.settings.lock().unwrap().language,
                     }),
                 );
 
@@ -224,14 +302,14 @@ fn start_timer_cycle(app: tauri::AppHandle) {
 // // 停止定时器循环
 // #[tauri::command]
 // fn stop_timer_cycle(app: tauri::AppHandle) {
-//     let state = app.state::<TimerState>();
+//     let state = app.state::<AppState>();
 //     *state.running.lock().unwrap() = false;
 // }
 
 // // 获取当前状态
 // #[tauri::command]
 // fn get_timer_status(app: tauri::AppHandle) -> serde_json::Value {
-//     let state = app.state::<TimerState>();
+//     let state = app.state::<AppState>();
 
 //     let phase = state.current_phase.lock().unwrap().clone();
 
@@ -246,7 +324,7 @@ fn start_timer_cycle(app: tauri::AppHandle) {
 fn hide_break_window(app: tauri::AppHandle) {
     hide_break_window_on_all_monitors(&app);
 
-    let state = app.state::<TimerState>();
+    let state = app.state::<AppState>();
 
     // 强制切换到工作阶段
     *state.current_phase.lock().unwrap() = TimerPhase::Work;
@@ -267,6 +345,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|_app, _args, _cwd| {}))
+        .plugin(tauri_plugin_os::init())
         .plugin(
             tauri_plugin_sql::Builder::default()
                 .add_migrations("sqlite:config.db", migrations)
@@ -274,7 +353,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
-        .manage(TimerState::default())
+        .manage(AppState::default())
         .setup(|app| {
             // 创建休息窗口
             create_break_window_on_all_monitors(app.handle());
@@ -349,6 +428,7 @@ fn hide_break_window_on_all_monitors(app: &tauri::AppHandle) {
         "work_start",
         serde_json::json!({
             "tips_index": index,
+            "current_language": app.state::<AppState>().settings.lock().unwrap().language.clone(),
         }),
     );
 }
@@ -390,18 +470,27 @@ fn create_break_window(
             .devtools(false) // fixme 开发模式下显示开发者工具
             .always_on_top(true) // fixme 是否置顶
             .skip_taskbar(true)
-            .content_protected(true)
+            .content_protected(false)
             .drag_and_drop(false)
             .build();
 }
 
 fn create_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), tauri::Error> {
-    let config_setting_i = MenuItem::with_id(app, CONFIG_SETTING, "配置", true, None::<&str>)?;
-    let quit_i = MenuItem::with_id(app, QUIT_APP, "退出", true, None::<&str>)?;
+    // 菜单按钮名称，国际化
+    let i18n: I18nTexts = get_i18n_texts(app.app_handle());
+
+    let config_setting_i = MenuItem::with_id(
+        app,
+        CONFIG_SETTING,
+        i18n.tray_menu_config,
+        true,
+        None::<&str>,
+    )?;
+    let quit_i = MenuItem::with_id(app, QUIT_APP, i18n.tray_menu_quit, true, None::<&str>)?;
 
     let menu = Menu::with_items(app, &[&config_setting_i, &quit_i])?;
 
-    let _tray = TrayIconBuilder::new()
+    let _tray = TrayIconBuilder::with_id("tray_icon")
         .icon(app.default_window_icon().unwrap().clone())
         .menu(&menu)
         .tooltip("HardBreak")
@@ -460,10 +549,18 @@ fn show_config_window<R: Runtime>(app: &tauri::AppHandle<R>) {
 
 fn send_break_notification(app: tauri::AppHandle) {
     // 处理多语言国际化
+    let i18n: I18nTexts = get_i18n_texts(&app);
     let _ = app
         .notification()
         .builder()
-        .title("HardBreak")
-        .body("10秒后进入休息，请做好准备")
+        .title(&i18n.notification_title)
+        .body(&i18n.notification_body)
         .show();
+}
+
+// 获取当前语言的辅助函数
+fn get_i18n_texts<R: Runtime>(app: &tauri::AppHandle<R>) -> I18nTexts {
+    let state = app.state::<AppState>();
+    let language = state.settings.lock().unwrap().language.clone();
+    I18nTexts::new(&language)
 }

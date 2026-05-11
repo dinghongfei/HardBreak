@@ -10,3 +10,4 @@ INSERT INTO settings (key, value) VALUES ('break_duration', '5');
 INSERT INTO settings (key, value) VALUES ('notify_before_break', '1');
 INSERT INTO settings (key, value) VALUES ('no_skip_mode', '0');
 INSERT INTO settings (key, value) VALUES ('first_run', '1');
+INSERT INTO settings (key, value) VALUES ('language', 'zh-CN');

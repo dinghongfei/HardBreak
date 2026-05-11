@@ -25,6 +25,7 @@ serde_json = "1"
 tauri-plugin-notification = "2"
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
 rand = "0.10.1"
+tauri-plugin-os = "2"
 
 
 [profile.dev]

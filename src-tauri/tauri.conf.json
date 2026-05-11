@@ -18,8 +18,8 @@
         "hiddenTitle": true,
         "titleBarStyle": "Transparent",
 
-        "width": 760,
-        "height": 480,
+        "width": 800,
+        "height": 520,
         "resizable": false,
         "fullscreen": false,
 
@@ -33,7 +33,7 @@
 
 
         "center": true,
-        "contentProtected": true,
+        "contentProtected": false,
         "dragDropEnabled": false
       }
     ],
