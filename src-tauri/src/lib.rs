@@ -402,7 +402,7 @@ fn show_break_window_on_all_monitors(app: &tauri::AppHandle) {
                 let _ = window.set_focus(); // 确保置顶生效
             } else {
                 // 窗口不存在：创建新窗口
-                create_break_window(app, &label, *position, *size);
+                create_break_window(app, &label, *position, *size, true);
             }
         }
     }
@@ -444,7 +444,7 @@ fn create_break_window_on_all_monitors(app: &tauri::AppHandle) {
             // 尝试获取已存在的窗口
             if app.get_webview_window(&label).is_none() {
                 // 窗口不存在：创建新窗口
-                create_break_window(app, &label, *position, *size);
+                create_break_window(app, &label, *position, *size, false);
             }
         }
     }
@@ -455,18 +455,19 @@ fn create_break_window(
     label: &str,
     position: tauri::PhysicalPosition<i32>,
     size: tauri::PhysicalSize<u32>,
+    visible: bool,
 ) {
     let _ =
         tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("index.html".into()))
             .title("HardBreak")
             .position(position.x as f64, position.y as f64)
-            .center()
+            // .center()
             .inner_size(size.width as f64, size.height as f64)
             .fullscreen(true) // fixme 全屏
             .resizable(false)
             .transparent(true) //是否透明
             .decorations(false) // fixme 是否有边框
-            .visible(false)
+            .visible(visible)
             .devtools(false) // fixme 开发模式下显示开发者工具
             .always_on_top(true) // fixme 是否置顶
             .skip_taskbar(true)
