@@ -1,1 +1,721 @@
-<h1>HardBreak</h1>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HardBreak — 番茄工作法 + 强制休息提醒</title>
+    <meta name="description" content="番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。">
+    <link rel="icon" href="/images/icon.ico" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        /* ========== Design Tokens ========== */
+        :root {
+            --bg: #000000;
+            --bg-elevated: #0a0a0a;
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+
+            --text-1: #f5f5f7;
+            --text-2: #86868b;
+            --text-3: #6e6e73;
+
+            --accent: #22c55e;
+            --accent-light: #4ade80;
+            --accent-dim: rgba(34, 197, 94, 0.12);
+
+            --border: rgba(255, 255, 255, 0.06);
+            --border-h: rgba(255, 255, 255, 0.12);
+
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --t: 0.3s var(--ease);
+
+            --pad-section: clamp(80px, 12vw, 140px);
+            --max-w: 1100px;
+            --r: 12px;
+            --r-lg: 20px;
+        }
+
+        /* ========== Reset ========== */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+        body { font-family: var(--font); background: var(--bg); color: var(--text-1); line-height: 1.6; overflow-x: hidden; }
+        img { max-width: 100%; display: block; }
+        a { color: inherit; text-decoration: none; }
+        ul { list-style: none; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+
+        /* ========== Navigation ========== */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 14px 32px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: var(--max-w); margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em;
+        }
+        .nav-logo-mark {
+            width: 28px; height: 28px;
+            /* background: linear-gradient(135deg, var(--accent), var(--accent-light)); */
+            border-radius: 7px;
+            display: grid; place-items: center;
+            color: #000; font-weight: 800; font-size: 0.8rem;
+        }
+        .nav-links { display: flex; gap: 32px; }
+        .nav-links a {
+            font-size: 0.85rem; color: var(--text-2); font-weight: 500;
+            transition: color var(--t);
+        }
+        .nav-links a:hover { color: var(--text-1); }
+
+        /* Language Switcher */
+        .lang-sw { position: relative; }
+        .lang-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 6px 14px; background: var(--bg-card);
+            border: 1px solid var(--border); color: var(--text-2);
+            font-size: 0.8rem; font-family: var(--font);
+            border-radius: 999px; cursor: pointer; transition: all var(--t);
+        }
+        .lang-btn:hover { background: var(--bg-card-hover); color: var(--text-1); border-color: var(--border-h); }
+        .lang-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .lang-dd {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            min-width: 140px; background: #1a1a1a;
+            border: 1px solid var(--border-h); border-radius: var(--r);
+            padding: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+            opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.97);
+            transition: all 0.2s var(--ease);
+        }
+        .lang-dd.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+        .lang-opt {
+            display: block; width: 100%; padding: 8px 12px;
+            background: none; border: none; color: var(--text-2);
+            font-size: 0.8rem; font-family: var(--font);
+            text-align: left; cursor: pointer; border-radius: 8px;
+            transition: all 0.15s var(--ease);
+        }
+        .lang-opt:hover { background: rgba(255,255,255,0.06); color: var(--text-1); }
+        .lang-opt.active { color: var(--accent); }
+
+        /* ========== Hero ========== */
+        .hero {
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 120px 24px 80px;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse 60% 45% at 50% -5%, var(--accent-dim), transparent);
+            pointer-events: none;
+        }
+        .hero-orb {
+            position: absolute; border-radius: 50%; pointer-events: none;
+            filter: blur(100px); opacity: 0.5;
+        }
+        .hero-orb--1 {
+            width: 500px; height: 500px;
+            background: rgba(34, 197, 94, 0.1);
+            top: -180px; left: calc(50% - 250px);
+            animation: orbY 10s ease-in-out infinite;
+        }
+        .hero-orb--2 {
+            width: 280px; height: 280px;
+            background: rgba(34, 197, 94, 0.06);
+            bottom: 15%; right: 8%;
+            animation: orbY 13s ease-in-out infinite reverse;
+        }
+        .hero-content { position: relative; z-index: 1; max-width: 700px; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 6px 16px; background: var(--accent-dim);
+            border: 1px solid rgba(34, 197, 94, 0.22);
+            border-radius: 999px; font-size: 0.8rem; color: var(--accent-light);
+            margin-bottom: 32px; animation: fadeUp 0.8s ease both;
+        }
+        .hero-badge-dot {
+            width: 6px; height: 6px; background: var(--accent);
+            border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+        }
+        .hero-title {
+            font-size: clamp(3.5rem, 9vw, 6rem);
+            font-weight: 900; line-height: 1; letter-spacing: -0.04em;
+            margin-bottom: 24px;
+            background: linear-gradient(180deg, #ffffff 20%, var(--text-2) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeUp 0.8s ease 0.1s both;
+        }
+        .hero-sub {
+            font-size: clamp(1rem, 2.2vw, 1.15rem);
+            color: var(--text-2); line-height: 1.7;
+            max-width: 520px; margin: 0 auto 40px;
+            animation: fadeUp 0.8s ease 0.2s both;
+        }
+        .hero-actions {
+            display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+            animation: fadeUp 0.8s ease 0.3s both;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 28px; border-radius: 999px;
+            font-size: 0.9rem; font-weight: 600; font-family: var(--font);
+            cursor: pointer; transition: all var(--t); border: none;
+        }
+        .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .btn--fill {
+            background: var(--text-1); color: #000;
+        }
+        .btn--fill:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(255,255,255,0.1); }
+        .btn--ghost {
+            background: rgba(255,255,255,0.05); color: var(--text-1);
+            border: 1px solid var(--border);
+        }
+        .btn--ghost:hover { background: rgba(255,255,255,0.09); border-color: var(--border-h); }
+
+        .hero-img {
+            position: relative; z-index: 1;
+            margin-top: 64px; max-width: 780px; width: 100%;
+            animation: fadeUp 0.8s ease 0.4s both;
+        }
+        .hero-img img {
+            width: 100%; border-radius: var(--r-lg);
+            border: 1px solid var(--border-h);
+            box-shadow: 0 0 60px rgba(34,197,94,0.06), 0 24px 64px rgba(0,0,0,0.5);
+        }
+
+        /* ========== Trust Bar ========== */
+        .trust {
+            padding: 48px 24px;
+            display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+        }
+        .trust-item {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.85rem; color: var(--text-2); font-weight: 500;
+        }
+        .trust-icon {
+            width: 36px; height: 36px;
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; display: grid; place-items: center; font-size: 1rem;
+        }
+
+        /* ========== Divider ========== */
+        .divider {
+            height: 1px; max-width: var(--max-w); margin: 0 auto;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+        }
+
+        /* ========== Section Common ========== */
+        .section {
+            padding: var(--pad-section) 24px;
+            max-width: var(--max-w); margin: 0 auto;
+        }
+        .section-label {
+            font-size: 0.75rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            color: var(--accent); margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: clamp(2rem, 4.5vw, 3rem);
+            font-weight: 800; line-height: 1.1;
+            letter-spacing: -0.03em; margin-bottom: 16px;
+        }
+        .section-desc {
+            font-size: 1.05rem; color: var(--text-2); line-height: 1.7;
+            max-width: 520px;
+        }
+        .sh-center { text-align: center; }
+        .sh-center .section-desc { margin: 0 auto; }
+        .section-header { margin-bottom: 56px; }
+
+        /* ========== Features ========== */
+        .feat-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;
+        }
+        .feat-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--r); padding: 36px;
+            transition: all var(--t); position: relative; overflow: hidden;
+        }
+        .feat-card::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(34,197,94,0.35), transparent);
+            opacity: 0; transition: opacity var(--t);
+        }
+        .feat-card:hover {
+            background: var(--bg-card-hover); border-color: var(--border-h);
+            transform: translateY(-2px);
+        }
+        .feat-card:hover::after { opacity: 1; }
+        .feat-card:hover .feat-ico { transform: scale(1.08); }
+        .feat-ico {
+            width: 44px; height: 44px;
+            background: var(--accent-dim); border-radius: 10px;
+            display: grid; place-items: center; font-size: 1.3rem;
+            margin-bottom: 20px; transition: transform var(--t);
+        }
+        .feat-name {
+            font-size: 1.15rem; font-weight: 600;
+            margin-bottom: 8px; letter-spacing: -0.01em;
+        }
+        .feat-text { font-size: 0.9rem; color: var(--text-2); line-height: 1.65; }
+
+        /* ========== Highlight (Notification) ========== */
+        .highlight {
+            padding: var(--pad-section) 24px;
+            max-width: var(--max-w); margin: 0 auto;
+            display: flex; align-items: center; gap: 64px;
+        }
+        .hl-text { flex: 1; }
+        .hl-text .section-label { margin-bottom: 12px; }
+        .hl-text .section-title { margin-bottom: 16px; }
+        .hl-text .section-desc { max-width: 420px; }
+        .hl-img { flex: 1; }
+        .hl-img img {
+            width: 100%; border-radius: var(--r-lg);
+            border: 1px solid var(--border);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+        }
+
+        /* ========== Screenshots ========== */
+        .ss-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+        }
+        .ss-card {
+            border-radius: var(--r); overflow: hidden;
+            border: 1px solid var(--border); background: var(--bg-card);
+            transition: all var(--t);
+        }
+        .ss-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+            border-color: var(--border-h);
+        }
+        .ss-card img { width: 100%; }
+        .ss-cap {
+            padding: 14px 20px; font-size: 0.85rem;
+            color: var(--text-3); text-align: center;
+        }
+
+        /* ========== CTA ========== */
+        .cta {
+            text-align: center; padding: var(--pad-section) 24px;
+            position: relative;
+        }
+        .cta::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(ellipse 50% 70% at 50% 100%, rgba(34,197,94,0.06), transparent);
+            pointer-events: none;
+        }
+        .cta-wrap { position: relative; z-index: 1; }
+        .cta-title {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800; line-height: 1.1;
+            letter-spacing: -0.03em; margin-bottom: 16px;
+        }
+        .cta-desc {
+            font-size: 1.05rem; color: var(--text-2); margin-bottom: 36px;
+        }
+
+        /* ========== Footer ========== */
+        .footer {
+            border-top: 1px solid var(--border); padding: 32px 24px;
+        }
+        .footer-inner {
+            max-width: var(--max-w); margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .footer-copy { font-size: 0.8rem; color: var(--text-3); }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-links a {
+            font-size: 0.8rem; color: var(--text-3); transition: color var(--t);
+        }
+        .footer-links a:hover { color: var(--text-1); }
+
+        /* ========== Animations ========== */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        @keyframes orbY {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-28px); }
+        }
+        .reveal {
+            opacity: 0; transform: translateY(28px);
+            transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+        }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        .reveal-d1 { transition-delay: 0.08s; }
+        .reveal-d2 { transition-delay: 0.16s; }
+        .reveal-d3 { transition-delay: 0.24s; }
+
+        /* ========== Responsive ========== */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .feat-grid { grid-template-columns: 1fr; }
+            .ss-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+            .highlight { flex-direction: column; gap: 40px; text-align: center; }
+            .hl-text .section-desc { margin: 0 auto; }
+            .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
+            .hero-actions { flex-direction: column; align-items: center; }
+            .trust { gap: 24px; }
+        }
+        @media (max-width: 480px) {
+            .feat-card { padding: 24px; }
+            .hero { padding-top: 100px; }
+            .trust { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== Navigation ===== -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo">
+                <img src="/images/icon.ico" alt="HardBreak" class="nav-logo-mark" style="width:24px;height:24px;object-fit:contain;vertical-align:middle;">
+                <span>HardBreak</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features" data-i18n="nav.features">功能</a></li>
+                <li><a href="#screenshots" data-i18n="nav.screenshots">截图</a></li>
+                <li><a href="#download" data-i18n="nav.download">下载</a></li>
+            </ul>
+            <div class="lang-sw">
+                <button class="lang-btn" id="langBtn" aria-label="切换语言">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span id="langLabel">简体中文</span>
+                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4l2 2.5L7 4"/></svg>
+                </button>
+                <div class="lang-dd" id="langDd">
+                    <button class="lang-opt active" data-lang="zh-CN">简体中文</button>
+                    <button class="lang-opt" data-lang="zh-TW">繁體中文</button>
+                    <button class="lang-opt" data-lang="en">English</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="hero">
+        <div class="hero-orb hero-orb--1"></div>
+        <div class="hero-orb hero-orb--2"></div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                <span data-i18n="hero.badge">Windows 桌面应用</span>
+            </div>
+            <h1 class="hero-title">HardBreak</h1>
+            <p class="hero-sub" data-i18n="hero.subtitle">番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。</p>
+            <div class="hero-actions">
+                <a href="#download" class="btn btn--fill" data-i18n="hero.cta">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
+                    免费下载
+                </a>
+                <a href="#features" class="btn btn--ghost" data-i18n="hero.cta2">了解更多</a>
+            </div>
+        </div>
+        <div class="hero-img">
+            <img id="imgHero" src="images/中文-配置.png" alt="HardBreak Settings">
+        </div>
+    </section>
+
+    <!-- ===== Trust Bar ===== -->
+    <div class="trust reveal">
+        <div class="trust-item">
+            <span class="trust-icon">🔒</span>
+            <span data-i18n="trust.t1">隐私优先，不收集数据</span>
+        </div>
+        <div class="trust-item">
+            <span class="trust-icon">⚡</span>
+            <span data-i18n="trust.t2">极低资源占用</span>
+        </div>
+        <div class="trust-item">
+            <span class="trust-icon">✨</span>
+            <span data-i18n="trust.t3">干净无广告</span>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ===== Features ===== -->
+    <section class="section" id="features">
+        <div class="section-header reveal">
+            <p class="section-label" data-i18n="feat.label">核心功能</p>
+            <h2 class="section-title" data-i18n="feat.title">专注工作，科学休息</h2>
+            <p class="section-desc" data-i18n="feat.desc">每一个功能都经过精心设计，帮助你在效率与健康之间找到完美平衡。</p>
+        </div>
+        <div class="feat-grid">
+            <div class="feat-card reveal">
+                <div class="feat-ico">🍅</div>
+                <h3 class="feat-name" data-i18n="feat.f1t">番茄计时</h3>
+                <p class="feat-text" data-i18n="feat.f1d">默认工作 25 分钟 / 休息 5 分钟，时长可自定义。自动循环，让你的工作节奏井然有序。</p>
+            </div>
+            <div class="feat-card reveal reveal-d1">
+                <div class="feat-ico">🖥️</div>
+                <h3 class="feat-name" data-i18n="feat.f2t">多屏幕支持</h3>
+                <p class="feat-text" data-i18n="feat.f2d">休息时所有显示器均弹出休息提示窗口。无论你在哪块屏幕上操作，都不会错过提醒。</p>
+            </div>
+            <div class="feat-card reveal reveal-d2">
+                <div class="feat-ico">💡</div>
+                <h3 class="feat-name" data-i18n="feat.f3t">动态休息提示</h3>
+                <p class="feat-text" data-i18n="feat.f3d">每次休息随机展示不同健康建议——喝水、深呼吸、远眺窗外，让休息不再枯燥。</p>
+            </div>
+            <div class="feat-card reveal reveal-d3">
+                <div class="feat-ico">🔒</div>
+                <h3 class="feat-name" data-i18n="feat.f4t">不可跳过模式</h3>
+                <p class="feat-text" data-i18n="feat.f4d">开启后休息时无法点击"跳过"，强制养成健康习惯。对自己狠一点，告别拖延。</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== Highlight: Pre-break Notification ===== -->
+    <section class="highlight" id="notify">
+        <div class="hl-text reveal">
+            <p class="section-label" data-i18n="hl.label">贴心提醒</p>
+            <h2 class="section-title" data-i18n="hl.title">休息前 10 秒，提前预告</h2>
+            <p class="section-desc" data-i18n="hl.desc">工作结束前弹出系统通知，给你充足的时间保存进度、完成手头的工作，从容进入休息。</p>
+        </div>
+        <div class="hl-img reveal reveal-d1">
+            <img id="imgNotify" src="images/中文-休息提醒.png" alt="Pre-break notification">
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== Screenshots ===== -->
+    <section class="section" id="screenshots">
+        <div class="section-header sh-center reveal">
+            <p class="section-label" data-i18n="ss.label">界面预览</p>
+            <h2 class="section-title" data-i18n="ss.title">简洁优雅的休息界面</h2>
+            <p class="section-desc" data-i18n="ss.desc">全屏沉浸式休息窗口，动态健康提示搭配倒计时，每次休息都是一次小小的放松。</p>
+        </div>
+        <div class="ss-grid">
+            <div class="ss-card reveal">
+                <img id="imgSkip" src="images/中文-休息-可跳过.png" alt="Break - skippable">
+                <div class="ss-cap" data-i18n="ss.cap1">休息界面 — 可跳过</div>
+            </div>
+            <div class="ss-card reveal reveal-d1">
+                <img id="imgNoSkip" src="images/中文-休息-不可跳过.png" alt="Break - no skip">
+                <div class="ss-cap" data-i18n="ss.cap2">休息界面 — 不可跳过模式</div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta" id="download">
+        <div class="cta-wrap reveal">
+            <h2 class="cta-title" data-i18n="cta.title">是时候善待自己了</h2>
+            <p class="cta-desc" data-i18n="cta.desc">免费下载 HardBreak，从今天开始科学休息。</p>
+            <a href="#" class="btn btn--fill" data-i18n="cta.btn">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
+                立即下载
+            </a>
+        </div>
+    </section>
+
+    <!-- ===== Footer ===== -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <span class="footer-copy" data-i18n="footer.copy">&copy; 2025 HardBreak. 保护你的健康。</span>
+            <ul class="footer-links">
+                <li><a href="#" data-i18n="footer.privacy">隐私政策</a></li>
+                <li><a href="#" data-i18n="footer.contact">联系我们</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <script>
+    /* ==========================================
+       Internationalization
+       ========================================== */
+    const T = {
+        'zh-CN': {
+            'nav.features': '功能', 'nav.screenshots': '截图', 'nav.download': '下载',
+            'hero.badge': 'Windows 桌面应用',
+            'hero.subtitle': '番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。',
+            'hero.cta': '免费下载', 'hero.cta2': '了解更多',
+            'trust.t1': '隐私优先，不收集数据', 'trust.t2': '极低资源占用', 'trust.t3': '干净无广告',
+            'feat.label': '核心功能', 'feat.title': '专注工作，科学休息',
+            'feat.desc': '每一个功能都经过精心设计，帮助你在效率与健康之间找到完美平衡。',
+            'feat.f1t': '番茄计时', 'feat.f1d': '默认工作 25 分钟 / 休息 5 分钟，时长可自定义。自动循环，让你的工作节奏井然有序。',
+            'feat.f2t': '多屏幕支持', 'feat.f2d': '休息时所有显示器均弹出休息提示窗口。无论你在哪块屏幕上操作，都不会错过提醒。',
+            'feat.f3t': '动态休息提示', 'feat.f3d': '每次休息随机展示不同健康建议——喝水、深呼吸、远眺窗外，让休息不再枯燥。',
+            'feat.f4t': '不可跳过模式', 'feat.f4d': '开启后休息时无法点击"跳过"，强制养成健康习惯。对自己狠一点，告别拖延。',
+            'hl.label': '贴心提醒', 'hl.title': '休息前 10 秒，提前预告',
+            'hl.desc': '工作结束前弹出系统通知，给你充足的时间保存进度、完成手头的工作，从容进入休息。',
+            'ss.label': '界面预览', 'ss.title': '简洁优雅的休息界面',
+            'ss.desc': '全屏沉浸式休息窗口，动态健康提示搭配倒计时，每次休息都是一次小小的放松。',
+            'ss.cap1': '休息界面 — 可跳过', 'ss.cap2': '休息界面 — 不可跳过模式',
+            'cta.title': '是时候善待自己了', 'cta.desc': '免费下载 HardBreak，从今天开始科学休息。', 'cta.btn': '立即下载',
+            'footer.copy': '\u00a9 2025 HardBreak. 保护你的健康。',
+            'footer.privacy': '隐私政策', 'footer.contact': '联系我们',
+            '_meta.title': 'HardBreak — 番茄工作法 + 强制休息提醒',
+            '_meta.desc': '番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。'
+        },
+        'zh-TW': {
+            'nav.features': '功能', 'nav.screenshots': '截圖', 'nav.download': '下載',
+            'hero.badge': 'Windows 桌面應用',
+            'hero.subtitle': '番茄工作法 + 強制休息提醒，支援多螢幕顯示動態健康提示，保護頸椎與視力。',
+            'hero.cta': '免費下載', 'hero.cta2': '瞭解更多',
+            'trust.t1': '隱私優先，不收集資料', 'trust.t2': '極低資源佔用', 'trust.t3': '乾淨無廣告',
+            'feat.label': '核心功能', 'feat.title': '專注工作，科學休息',
+            'feat.desc': '每一個功能都經過精心設計，幫助你在效率與健康之間找到完美平衡。',
+            'feat.f1t': '番茄計時', 'feat.f1d': '預設工作 25 分鐘 / 休息 5 分鐘，時長可自訂。自動循環，讓你的工作節奏井然有序。',
+            'feat.f2t': '多螢幕支援', 'feat.f2d': '休息時所有顯示器均彈出休息提示視窗。無論你在哪塊螢幕上操作，都不會錯過提醒。',
+            'feat.f3t': '動態休息提示', 'feat.f3d': '每次休息隨機展示不同健康建議——喝水、深呼吸、遠眺窗外，讓休息不再枯燥。',
+            'feat.f4t': '不可跳過模式', 'feat.f4d': '開啟後休息時無法點擊「跳過」，強制養成健康習慣。對自己嚴格一點，告別拖延。',
+            'hl.label': '貼心提醒', 'hl.title': '休息前 10 秒，提前預告',
+            'hl.desc': '工作結束前彈出系統通知，給你充足的時間儲存進度、完成手頭的工作，從容進入休息。',
+            'ss.label': '介面預覽', 'ss.title': '簡潔優雅的休息介面',
+            'ss.desc': '全螢幕沉浸式休息視窗，動態健康提示搭配倒數計時，每次休息都是一次小小的放鬆。',
+            'ss.cap1': '休息介面 — 可跳過', 'ss.cap2': '休息介面 — 不可跳過模式',
+            'cta.title': '是時候善待自己了', 'cta.desc': '免費下載 HardBreak，從今天開始科學休息。', 'cta.btn': '立即下載',
+            'footer.copy': '\u00a9 2025 HardBreak. 守護你的健康。',
+            'footer.privacy': '隱私政策', 'footer.contact': '聯繫我們',
+            '_meta.title': 'HardBreak — 番茄工作法 + 強制休息提醒',
+            '_meta.desc': '番茄工作法 + 強制休息提醒，支援多螢幕顯示動態健康提示，保護頸椎與視力。'
+        },
+        'en': {
+            'nav.features': 'Features', 'nav.screenshots': 'Preview', 'nav.download': 'Download',
+            'hero.badge': 'Windows Desktop App',
+            'hero.subtitle': 'Pomodoro timer + enforced break reminders with multi-screen support & dynamic health tips to protect your eyes and posture.',
+            'hero.cta': 'Free Download', 'hero.cta2': 'Learn More',
+            'trust.t1': 'Privacy first, no data collected', 'trust.t2': 'Minimal resource usage', 'trust.t3': 'Clean, ad-free',
+            'feat.label': 'CORE FEATURES', 'feat.title': 'Stay focused. Rest smart.',
+            'feat.desc': 'Every feature is carefully designed to help you find the perfect balance between productivity and health.',
+            'feat.f1t': 'Pomodoro Timer', 'feat.f1d': 'Default 25 min work / 5 min break, fully customizable. Automatic cycling keeps your work rhythm organized.',
+            'feat.f2t': 'Multi-Screen Support', 'feat.f2d': "Break windows appear on all connected displays. No matter which screen you're working on, you'll never miss a reminder.",
+            'feat.f3t': 'Dynamic Break Tips', 'feat.f3d': 'Random health suggestions each break \u2014 drink water, deep breaths, look away. Keeps breaks fresh and educational.',
+            'feat.f4t': 'No-Skip Mode', 'feat.f4d': 'When enabled, the skip button is disabled during breaks. Be strict with yourself \u2014 no more "just five more minutes".',
+            'hl.label': 'THOUGHTFUL DESIGN', 'hl.title': '10-second heads-up before break',
+            'hl.desc': 'A system notification appears before each break, giving you time to save your progress and wrap up.',
+            'ss.label': 'PREVIEW', 'ss.title': 'Clean, elegant break screen',
+            'ss.desc': 'Full-screen immersive break windows with dynamic health tips and countdown. Every break is a moment of relaxation.',
+            'ss.cap1': 'Break Screen \u2014 Skippable', 'ss.cap2': 'Break Screen \u2014 No-Skip Mode',
+            'cta.title': 'Time to take care of yourself', 'cta.desc': 'Download HardBreak for free and start resting the smart way.', 'cta.btn': 'Download Now',
+            'footer.copy': '\u00a9 2025 HardBreak. Protecting your health.',
+            'footer.privacy': 'Privacy Policy', 'footer.contact': 'Contact Us',
+            '_meta.title': 'HardBreak \u2014 Pomodoro Timer + Enforced Break Reminders',
+            '_meta.desc': 'Pomodoro timer + enforced break reminders with multi-screen support & dynamic health tips.'
+        }
+    };
+
+    const IMG = {
+        'zh-CN': { config: 'images/中文-配置.png', notify: 'images/中文-休息提醒.png', skip: 'images/中文-休息-可跳过.png', noskip: 'images/中文-休息-不可跳过.png' },
+        'zh-TW': { config: 'images/繁体-配置.png', notify: 'images/繁体-休息提醒.png', skip: 'images/繁体-休息-可跳过.png', noskip: 'images/繁体-休息-不可跳过.png' },
+        'en':    { config: 'images/英语-配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/英语-休息-可跳过.png', noskip: 'images/英语-休息-不可跳过.png' }
+    };
+
+    const LANG_NAMES = { 'zh-CN': '简体中文', 'zh-TW': '繁體中文', 'en': 'English' };
+    const LANG_HTML  = { 'zh-CN': 'zh-CN', 'zh-TW': 'zh-TW', 'en': 'en' };
+    let cur = 'zh-CN';
+
+    function setLang(lang) {
+        cur = lang;
+        const t = T[lang], img = IMG[lang];
+
+        // Update all text nodes
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (t[key] != null) {
+                // For buttons with SVG children, only update text nodes
+                if (el.querySelector('svg')) {
+                    const textNodes = Array.from(el.childNodes).filter(n => n.nodeType === 3);
+                    if (textNodes.length) {
+                        textNodes[textNodes.length - 1].textContent = '\n' + t[key] + '\n';
+                    }
+                } else {
+                    el.textContent = t[key];
+                }
+            }
+        });
+
+        // Update images
+        document.getElementById('imgHero').src = img.config;
+        document.getElementById('imgNotify').src = img.notify;
+        document.getElementById('imgSkip').src = img.skip;
+        document.getElementById('imgNoSkip').src = img.noskip;
+
+        // Update meta
+        document.title = t['_meta.title'];
+        document.querySelector('meta[name="description"]').content = t['_meta.desc'];
+        document.documentElement.lang = LANG_HTML[lang];
+
+        // Update switcher
+        document.getElementById('langLabel').textContent = LANG_NAMES[lang];
+        document.querySelectorAll('.lang-opt').forEach(o =>
+            o.classList.toggle('active', o.dataset.lang === lang)
+        );
+        document.getElementById('langDd').classList.remove('open');
+    }
+
+    /* ==========================================
+       Language Dropdown
+       ========================================== */
+    document.getElementById('langBtn').addEventListener('click', e => {
+        e.stopPropagation();
+        document.getElementById('langDd').classList.toggle('open');
+    });
+    document.querySelectorAll('.lang-opt').forEach(o =>
+        o.addEventListener('click', () => setLang(o.dataset.lang))
+    );
+    document.addEventListener('click', () =>
+        document.getElementById('langDd').classList.remove('open')
+    );
+
+    /* ==========================================
+       Scroll Reveal
+       ========================================== */
+    const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); }
+        });
+    }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+    /* ==========================================
+       Smooth scroll for nav links (handle fixed nav offset)
+       ========================================== */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const id = a.getAttribute('href');
+            if (id === '#') return;
+            const target = document.querySelector(id);
+            if (target) {
+                e.preventDefault();
+                const top = target.getBoundingClientRect().top + window.scrollY - 70;
+                window.scrollTo({ top, behavior: 'smooth' });
+            }
+        });
+    });
+    </script>
+</body>
+</html>
+
