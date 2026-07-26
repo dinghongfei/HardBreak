@@ -208,7 +208,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
 
 
-
+    // 更新应用版本
+    const appVersion = await invoke('get_app_version');
+    document.getElementById('app-version').textContent = appVersion;
 
 
 

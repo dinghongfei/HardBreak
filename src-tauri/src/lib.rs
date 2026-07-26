@@ -320,6 +320,8 @@ fn start_timer_cycle(app: tauri::AppHandle) {
 //     })
 // }
 
+
+
 #[tauri::command]
 fn hide_break_window(app: tauri::AppHandle) {
     hide_break_window_on_all_monitors(&app);
@@ -329,6 +331,14 @@ fn hide_break_window(app: tauri::AppHandle) {
     // 强制切换到工作阶段
     *state.current_phase.lock().unwrap() = TimerPhase::Work;
 }
+
+
+#[tauri::command]
+fn get_app_version(app: tauri::AppHandle) -> String {
+    app.package_info().version.to_string()
+}
+
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -370,6 +380,7 @@ pub fn run() {
             update_settings,
             start_timer_cycle,
             hide_break_window,
+            get_app_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
