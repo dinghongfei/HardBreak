@@ -1,31 +1,50 @@
+English | [简体中文](README.zh-CN.md)
+
 # HardBreak
-Pomodoro timer + enforced break reminders with multi‑screen support & dynamic healthy tips.
 
+A Pomodoro timer that puts a break window on every display when it is time to rest.
 
+<p align="center">
+  <img src="docs/images/英语-休息-可跳过.png" alt="HardBreak break window" width="720">
+</p>
 
-## Product Features
-- Default 25 min work / 5 min break (customizable Pomodoro)
-- Real‑time “countdown to next break”
-- **Multi‑screen support**: break windows appear on all connected displays
-- **Dynamic break tips**: random health suggestions each break (e.g., “Drink some water”, “Three deep breaths”, “Stretch your neck”)
-- Optional pre‑break reminder (popup 10 seconds before work ends)
-- Optional skip‑proof mode (disable skip button during break)
-- Clear remaining time display on break window; skip button when allowed
-- Clean, minimal UI; sits in system tray; low resource usage
+<p align="center">
+  <a href="https://apps.microsoft.com/detail/9N3DPNG7LML0">Download for Windows</a>
+  ·
+  <a href="https://github.com/dinghongfei/HardBreak/releases">Download for macOS</a>
+</p>
 
-## App Description
-HardBreak is a health & productivity tool for anyone who spends long hours at a computer. It combines the Pomodoro Technique with enforced break scheduling, helping you naturally balance focused work and necessary rest.
+## Features
 
-**Why HardBreak?**  
-Continuous screen time leads to eye strain, neck pain, and declining attention. HardBreak doesn’t rely on your willpower – it uses a timer to *remind you with authority* and offers gentle guidance during breaks.
+- **Pomodoro cycle.** 25 minutes of work and 5 minutes of rest by default. Both durations are adjustable, and the cycle repeats on its own.
+- **Every display.** When a break starts, each connected monitor gets its own break window, including a fullscreen app on that screen.
+- **Break tips.** Each break shows one health suggestion, such as drinking water, looking into the distance, or standing up.
+- **Ten-second notice.** An optional system notification appears 10 seconds before the break.
+- **No-skip mode.** Turn off the Skip button when you want the break to finish.
+- **Tray only on macOS.** The app stays in the menu bar. It does not appear in the Dock.
+- **Private by design.** Settings stay on this computer. There is no account and no usage reporting. See [PRIVACY.md](PRIVACY.md).
 
-**Core Experience**  
-Start the timer and the app cycles automatically: work → break → work. During work, the main window and tray icon show how long until your next break. When break time comes, **every connected display** shows a break window – so you never miss a reminder, no matter which screen you’re using. Inside the break window, a random dynamic tip appears (from a built‑in collection of actionable health advice), along with a countdown. If you enable “skip‑proof mode”, the Skip button is disabled, forcing you to step away from the keyboard.
+## Platforms
 
-**Key Features Explained**  
-- **Multi‑screen support**: perfect for multi‑monitor setups (coding, design, video editing, trading). Every monitor gets the break prompt.  
-- **Dynamic tips**: keeps breaks fresh and educational – you learn a small healthy habit each time.  
-- **Pre‑break reminder**: a 10‑second advance notice to save your work and wrap up.  
-- **Skip‑proof mode**: no cheating – breaks become non‑negotiable.  
+| | |
+|---|---|
+| Windows | Microsoft Store |
+| macOS | [GitHub Releases](https://github.com/dinghongfei/HardBreak/releases) |
 
-HardBreak has a clean, ad‑free interface, collects no private data, and consumes negligible system resources. Whether you are a developer, designer, student, or remote worker, HardBreak becomes your silent desktop guardian.
+Languages: English, Simplified Chinese, and Traditional Chinese. On first launch, HardBreak follows the system language.
+
+## Development
+
+Requirements: [Node.js](https://nodejs.org/), [pnpm](https://pnpm.io/), and [Rust](https://www.rust-lang.org/).
+
+```bash
+pnpm install
+pnpm tauri dev
+pnpm tauri build
+```
+
+The app version is `version` in `src-tauri/tauri.conf.json`. `package.json` is not the app version.
+
+## License
+
+[Apache License 2.0](LICENSE)

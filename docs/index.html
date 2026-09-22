@@ -82,7 +82,17 @@
         .nav-links a:hover { color: var(--text-1); }
 
         /* Language Switcher */
+        .nav-actions { display: flex; align-items: center; gap: 8px; }
         .lang-sw { position: relative; }
+        .nav-github {
+            display: grid; place-items: center;
+            width: 32px; height: 32px; flex-shrink: 0;
+            color: var(--text-2); background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: 999px;
+            transition: all var(--t);
+        }
+        .nav-github:hover { background: var(--bg-card-hover); color: var(--text-1); border-color: var(--border-h); }
+        .nav-github svg { width: 16px; height: 16px; display: block; }
         .lang-btn {
             display: flex; align-items: center; gap: 6px;
             padding: 6px 14px; background: var(--bg-card);
@@ -332,6 +342,7 @@
         .cta-desc {
             font-size: 1.05rem; color: var(--text-2); margin-bottom: 36px;
         }
+        .cta .hero-actions { justify-content: center; }
 
         /* ========== Footer ========== */
         .footer {
@@ -402,17 +413,22 @@
                 <li><a href="#screenshots" data-i18n="nav.screenshots">截图</a></li>
                 <li><a href="#download" data-i18n="nav.download">下载</a></li>
             </ul>
-            <div class="lang-sw">
-                <button class="lang-btn" id="langBtn" aria-label="切换语言">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                    <span id="langLabel">简体中文</span>
-                    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4l2 2.5L7 4"/></svg>
-                </button>
-                <div class="lang-dd" id="langDd">
-                    <button class="lang-opt active" data-lang="zh-CN">简体中文</button>
-                    <button class="lang-opt" data-lang="zh-TW">繁體中文</button>
-                    <button class="lang-opt" data-lang="en">English</button>
+            <div class="nav-actions">
+                <div class="lang-sw">
+                    <button class="lang-btn" id="langBtn" aria-label="切换语言">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        <span id="langLabel">简体中文</span>
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 4l2 2.5L7 4"/></svg>
+                    </button>
+                    <div class="lang-dd" id="langDd">
+                        <button class="lang-opt active" data-lang="zh-CN">简体中文</button>
+                        <button class="lang-opt" data-lang="zh-TW">繁體中文</button>
+                        <button class="lang-opt" data-lang="en">English</button>
+                    </div>
                 </div>
+                <a class="nav-github" href="https://github.com/dinghongfei/HardBreak" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+                </a>
             </div>
         </div>
     </nav>
@@ -424,14 +440,18 @@
         <div class="hero-content">
             <div class="hero-badge">
                 <span class="hero-badge-dot"></span>
-                <span data-i18n="hero.badge">Windows 桌面应用</span>
+                <span data-i18n="hero.badge">Windows 与 macOS 桌面应用</span>
             </div>
             <h1 class="hero-title">HardBreak</h1>
             <p class="hero-sub" data-i18n="hero.subtitle">番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。</p>
             <div class="hero-actions">
-                <a href="https://apps.microsoft.com/detail/9N3DPNG7LML0" target="_blank" class="btn btn--fill" data-i18n="hero.cta">
+                <a href="https://apps.microsoft.com/detail/9N3DPNG7LML0" target="_blank" class="btn btn--fill" data-i18n="hero.cta.win">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
-                    免费下载
+                    Windows 下载
+                </a>
+                <a href="https://github.com/dinghongfei/HardBreak/releases" target="_blank" class="btn btn--fill" data-i18n="hero.cta.mac">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
+                    macOS 下载
                 </a>
                 <a href="#features" class="btn btn--ghost" data-i18n="hero.cta2">了解更多</a>
             </div>
@@ -546,19 +566,26 @@
         <div class="cta-wrap reveal">
             <h2 class="cta-title" data-i18n="cta.title">是时候善待自己了</h2>
             <p class="cta-desc" data-i18n="cta.desc">免费下载 HardBreak，从今天开始科学休息。</p>
-            <a href="https://apps.microsoft.com/detail/9N3DPNG7LML0" target="_blank" class="btn btn--fill" data-i18n="cta.btn">
-                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
-                立即下载
-            </a>
+            <div class="hero-actions">
+                <a href="https://apps.microsoft.com/detail/9N3DPNG7LML0" target="_blank" class="btn btn--fill" data-i18n="cta.btn.win">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
+                    Windows 下载
+                </a>
+                <a href="https://github.com/dinghongfei/HardBreak/releases" target="_blank" class="btn btn--fill" data-i18n="cta.btn.mac">
+                    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
+                    macOS 下载
+                </a>
+            </div>
         </div>
     </section>
 
     <!-- ===== Footer ===== -->
     <footer class="footer">
         <div class="footer-inner">
-            <span class="footer-copy" data-i18n="footer.copy">&copy; 2025 HardBreak. 保护你的健康。</span>
+            <span class="footer-copy" data-i18n="footer.copy">&copy; 2026 HardBreak. 保护你的健康。</span>
             <ul class="footer-links">
-                <li><a href="#" data-i18n="footer.privacy">隐私政策</a></li>
+                <li><a href="https://github.com/dinghongfei/HardBreak" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+                <li><a href="https://raw.githubusercontent.com/dinghongfei/HardBreak/refs/heads/main/PRIVACY.md" target="_blank" rel="noopener noreferrer" data-i18n="footer.privacy">隐私政策</a></li>
                 <li><a href="#" data-i18n="footer.contact">联系我们</a></li>
             </ul>
         </div>
@@ -571,9 +598,9 @@
     const T = {
         'zh-CN': {
             'nav.features': '功能', 'nav.screenshots': '截图', 'nav.download': '下载',
-            'hero.badge': 'Windows 桌面应用',
+            'hero.badge': 'Windows 与 macOS 桌面应用',
             'hero.subtitle': '番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。',
-            'hero.cta': '免费下载', 'hero.cta2': '了解更多',
+            'hero.cta.win': 'Windows 下载', 'hero.cta.mac': 'macOS 下载', 'hero.cta2': '了解更多',
             'trust.t1': '隐私优先，不收集数据', 'trust.t2': '极低资源占用', 'trust.t3': '干净无广告',
             'feat.label': '核心功能', 'feat.title': '专注工作，科学休息',
             'feat.desc': '每一个功能都经过精心设计，帮助你在效率与健康之间找到完美平衡。',
@@ -588,17 +615,17 @@
             'ss.cap1': '休息界面 — 可跳过', 'ss.cap2': '休息界面 — 不可跳过模式',
             'cfg.label': '灵活配置', 'cfg.title': '一切尽在你的掌控',
             'cfg.desc': '自定义工作时长、休息时长、提醒方式等参数，打造最适合你的工作节奏。',
-            'cta.title': '是时候善待自己了', 'cta.desc': '免费下载 HardBreak，从今天开始科学休息。', 'cta.btn': '立即下载',
-            'footer.copy': '\u00a9 2025 HardBreak. 保护你的健康。',
+            'cta.title': '是时候善待自己了', 'cta.desc': '免费下载 HardBreak，支持 Windows 与 macOS，从今天开始科学休息。', 'cta.btn.win': 'Windows 下载', 'cta.btn.mac': 'macOS 下载',
+            'footer.copy': '\u00a9 2026 HardBreak. 保护你的健康。',
             'footer.privacy': '隐私政策', 'footer.contact': '联系我们',
             '_meta.title': 'HardBreak — 番茄工作法 + 强制休息提醒',
             '_meta.desc': '番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。'
         },
         'zh-TW': {
             'nav.features': '功能', 'nav.screenshots': '截圖', 'nav.download': '下載',
-            'hero.badge': 'Windows 桌面應用',
+            'hero.badge': 'Windows 與 macOS 桌面應用',
             'hero.subtitle': '番茄工作法 + 強制休息提醒，支援多螢幕顯示動態健康提示，保護頸椎與視力。',
-            'hero.cta': '免費下載', 'hero.cta2': '瞭解更多',
+            'hero.cta.win': 'Windows 下載', 'hero.cta.mac': 'macOS 下載', 'hero.cta2': '瞭解更多',
             'trust.t1': '隱私優先，不收集資料', 'trust.t2': '極低資源佔用', 'trust.t3': '乾淨無廣告',
             'feat.label': '核心功能', 'feat.title': '專注工作，科學休息',
             'feat.desc': '每一個功能都經過精心設計，幫助你在效率與健康之間找到完美平衡。',
@@ -613,17 +640,17 @@
             'ss.cap1': '休息介面 — 可跳過', 'ss.cap2': '休息介面 — 不可跳過模式',
             'cfg.label': '靈活配置', 'cfg.title': '一切盡在你的掌控',
             'cfg.desc': '自訂工作時長、休息時長、提醒方式等參數，打造最適合你的工作節奏。',
-            'cta.title': '是時候善待自己了', 'cta.desc': '免費下載 HardBreak，從今天開始科學休息。', 'cta.btn': '立即下載',
-            'footer.copy': '\u00a9 2025 HardBreak. 守護你的健康。',
+            'cta.title': '是時候善待自己了', 'cta.desc': '免費下載 HardBreak，支援 Windows 與 macOS，從今天開始科學休息。', 'cta.btn.win': 'Windows 下載', 'cta.btn.mac': 'macOS 下載',
+            'footer.copy': '\u00a9 2026 HardBreak. 守護你的健康。',
             'footer.privacy': '隱私政策', 'footer.contact': '聯繫我們',
             '_meta.title': 'HardBreak — 番茄工作法 + 強制休息提醒',
             '_meta.desc': '番茄工作法 + 強制休息提醒，支援多螢幕顯示動態健康提示，保護頸椎與視力。'
         },
         'en': {
             'nav.features': 'Features', 'nav.screenshots': 'Preview', 'nav.download': 'Download',
-            'hero.badge': 'Windows Desktop App',
+            'hero.badge': 'Windows & macOS',
             'hero.subtitle': 'Pomodoro timer + enforced break reminders with multi-screen support & dynamic health tips to protect your eyes and posture.',
-            'hero.cta': 'Free Download', 'hero.cta2': 'Learn More',
+            'hero.cta.win': 'Download for Windows', 'hero.cta.mac': 'Download for macOS', 'hero.cta2': 'Learn More',
             'trust.t1': 'Privacy first, no data collected', 'trust.t2': 'Minimal resource usage', 'trust.t3': 'Clean, ad-free',
             'feat.label': 'CORE FEATURES', 'feat.title': 'Stay focused. Rest smart.',
             'feat.desc': 'Every feature is carefully designed to help you find the perfect balance between productivity and health.',
@@ -638,8 +665,8 @@
             'ss.cap1': 'Break Screen \u2014 Skippable', 'ss.cap2': 'Break Screen \u2014 No-Skip Mode',
             'cfg.label': 'FLEXIBLE SETTINGS', 'cfg.title': 'Everything under your control',
             'cfg.desc': 'Customize work duration, break length, notification style and more. Build the perfect rhythm for your workflow.',
-            'cta.title': 'Time to take care of yourself', 'cta.desc': 'Download HardBreak for free and start resting the smart way.', 'cta.btn': 'Download Now',
-            'footer.copy': '\u00a9 2025 HardBreak. Protecting your health.',
+            'cta.title': 'Time to take care of yourself', 'cta.desc': 'Download HardBreak for free on Windows and macOS, and start resting the smart way.', 'cta.btn.win': 'Download for Windows', 'cta.btn.mac': 'Download for macOS',
+            'footer.copy': '\u00a9 2026 HardBreak. Protecting your health.',
             'footer.privacy': 'Privacy Policy', 'footer.contact': 'Contact Us',
             '_meta.title': 'HardBreak \u2014 Pomodoro Timer + Enforced Break Reminders',
             '_meta.desc': 'Pomodoro timer + enforced break reminders with multi-screen support & dynamic health tips.'
