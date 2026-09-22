@@ -14,6 +14,12 @@ pnpm tauri build
 
 应用版本只改 `src-tauri/tauri.conf.json` 的 `version`。`get_app_version` 读的是它。`package.json` 的 `version` 不是应用版本。
 
+## 平台
+
+所有代码修改必须同时考虑 Windows、macOS、Linux。窗口、托盘、通知、快捷键、文件路径和系统 API 都要在三个系统上有明确行为。
+
+平台差异用 `cfg(target_os)` 或 Tauri 跨平台 API 分开处理。数据库继续用 `sqlite:config.db`，路径由插件解析到各系统的应用配置目录，不要写死某一个系统的绝对路径。
+
 ## 目录
 
 | 路径 | 职责 |

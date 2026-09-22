@@ -199,7 +199,8 @@ body {
 }
 
 
-.skip-btn:hover {
+.skip-btn:hover,
+.skip-btn.is-hover {
   color: color-mix(in oklab, var(--color-white, #ffffff) 80%, transparent);
   border-color: color-mix(in oklab, var(--color-white, #ffffff) 80%, transparent);
 }

@@ -10,11 +10,16 @@ use tauri::{
     tray::TrayIconBuilder,
     Emitter, Manager, Runtime,
 };
+#[cfg(not(target_os = "macos"))]
 use tauri_plugin_notification::NotificationExt;
 use tauri_plugin_sql::{Migration, MigrationKind};
 
 // 休息窗口标签前缀（用于标识和批量关闭）
 const BREAK_WINDOW_PREFIX: &str = "break_window_";
+
+/// 休息出现前正在前台的应用。主屏点击跳过会把本应用激活并切走全屏空间，结束时把它激活回来。
+#[cfg(target_os = "macos")]
+static PREVIOUS_FRONTMOST_BUNDLE: Mutex<Option<String>> = Mutex::new(None);
 
 // 托盘菜单项 ID
 const CONFIG_SETTING: &str = "config_setting";
@@ -388,7 +393,10 @@ pub fn run() {
 
 // 在所有显示器上显示休息窗口
 fn show_break_window_on_all_monitors(app: &tauri::AppHandle) {
-    // 获取所有显示器
+    #[cfg(target_os = "macos")]
+    show_macos_break_covering_each_screen(app);
+
+    #[cfg(not(target_os = "macos"))]
     if let Ok(monitors) = app.available_monitors() {
         for (i, monitor) in monitors.iter().enumerate() {
             let label = format!("{}{}", BREAK_WINDOW_PREFIX, i);
@@ -408,26 +416,52 @@ fn show_break_window_on_all_monitors(app: &tauri::AppHandle) {
                     width: size.width,
                     height: size.height,
                 }));
-                let _ = window.set_fullscreen(true);
-                let _ = window.show();
-                let _ = window.set_focus(); // 确保置顶生效
+                present_break_window(&window, *position, *size, monitor.scale_factor());
             } else {
                 // 窗口不存在：创建新窗口
-                create_break_window(app, &label, *position, *size, true);
+                create_break_window(app, &label, *position, *size, monitor.scale_factor(), true);
             }
         }
     }
-    // 通知前端：开始工作阶段
+
+    // 窗口刚显示时先推一次休息倒计时，避免界面停在 HTML 里的 00:00
+    let state = app.state::<AppState>();
+    let settings = state.settings.lock().unwrap();
+    let duration_seconds = settings.break_duration * 60;
+    let _ = app.emit(
+        "app-state-update",
+        serde_json::json!({
+            "phase": "break",
+            "duration": duration_seconds,
+            "remaining": duration_seconds,
+            "no_skip_mode": settings.no_skip_mode,
+            "current_language": settings.language,
+        }),
+    );
+    drop(settings);
+
     let _ = app.emit("break_start", ());
 }
 
 // 隐藏所有休息窗口（不销毁，便于下次快速显示）
 fn hide_break_window_on_all_monitors(app: &tauri::AppHandle) {
     let windows = app.webview_windows();
+    #[cfg(target_os = "macos")]
+    let mut restore_from = None;
     for (label, window) in windows.iter() {
         if label.starts_with(BREAK_WINDOW_PREFIX) {
-            let _ = window.hide(); // 隐藏而不是关闭
+            #[cfg(target_os = "macos")]
+            {
+                restore_from = Some(window.clone());
+            }
+            dismiss_break_window(window);
         }
+    }
+    #[cfg(target_os = "macos")]
+    if let Some(window) = restore_from {
+        // 先把点击跳过时抢走的前台还给原来的应用，再恢复本应用的激活策略。
+        restore_previous_frontmost_app(&window);
+        restore_macos_activation_policy(&window);
     }
     // 需要计算下一次要展示的文案,计算index,返回给前端
 
@@ -455,7 +489,7 @@ fn create_break_window_on_all_monitors(app: &tauri::AppHandle) {
             // 尝试获取已存在的窗口
             if app.get_webview_window(&label).is_none() {
                 // 窗口不存在：创建新窗口
-                create_break_window(app, &label, *position, *size, false);
+                create_break_window(app, &label, *position, *size, monitor.scale_factor(), false);
             }
         }
     }
@@ -466,6 +500,7 @@ fn create_break_window(
     label: &str,
     position: tauri::PhysicalPosition<i32>,
     size: tauri::PhysicalSize<u32>,
+    scale: f64,
     visible: bool,
 ) {
     let _ =
@@ -474,7 +509,6 @@ fn create_break_window(
             .position(position.x as f64, position.y as f64)
             // .center()
             .inner_size(size.width as f64, size.height as f64)
-            .fullscreen(true) // fixme 全屏
             .resizable(false)
             .transparent(true) //是否透明
             .decorations(false) // fixme 是否有边框
@@ -483,8 +517,375 @@ fn create_break_window(
             .always_on_top(true) // fixme 是否置顶
             .skip_taskbar(true)
             .content_protected(false)
-            .drag_and_drop(false)
+            .disable_drag_drop_handler()
+            // 非当前窗口时，第一次点击会只用来激活窗口。打开后单击就能点到跳过。
+            .accept_first_mouse(true)
             .build();
+
+    if visible {
+        if let Some(window) = app.get_webview_window(label) {
+            present_break_window(&window, position, size, scale);
+        }
+    }
+}
+
+/// macOS 不进入系统全屏空间。系统全屏会在出现和消失时切换桌面，Windows 没有这一步。
+fn present_break_window(
+    window: &tauri::WebviewWindow,
+    position: tauri::PhysicalPosition<i32>,
+    size: tauri::PhysicalSize<u32>,
+    scale: f64,
+) {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = window.show();
+        show_macos_break_overlay(window, position, size, scale);
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = (position, size, scale);
+        let _ = window.set_always_on_top(true);
+        let _ = window.set_visible_on_all_workspaces(true);
+        let _ = window.show();
+        let _ = window.set_focus();
+        let _ = window.set_simple_fullscreen(true);
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn with_ns_window(window: &tauri::WebviewWindow, f: impl FnOnce(&objc2_app_kit::NSWindow)) {
+    let Ok(ptr) = window.ns_window() else {
+        return;
+    };
+    if ptr.is_null() {
+        return;
+    }
+    unsafe {
+        f(&*ptr.cast::<objc2_app_kit::NSWindow>());
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn shielding_window_level() -> objc2_app_kit::NSWindowLevel {
+    #[link(name = "CoreGraphics", kind = "framework")]
+    extern "C" {
+        fn CGShieldingWindowLevel() -> i32;
+    }
+    // 主屏全屏应用有一层 shielding window，普通屏保层级盖不住它。
+    unsafe { CGShieldingWindowLevel() as objc2_app_kit::NSWindowLevel + 1 }
+}
+
+#[cfg(target_os = "macos")]
+fn macos_screen_frames(app: &tauri::AppHandle) -> Vec<(f64, f64, f64, f64)> {
+    let Some(anchor) = app.get_webview_window("config_window") else {
+        return Vec::new();
+    };
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+    if anchor
+        .run_on_main_thread(move || {
+            use objc2::MainThreadMarker;
+            use objc2_app_kit::NSScreen;
+
+            let mut frames = Vec::new();
+            if let Some(mtm) = MainThreadMarker::new() {
+                for screen in NSScreen::screens(mtm).iter() {
+                    let frame = screen.frame();
+                    frames.push((
+                        frame.origin.x,
+                        frame.origin.y,
+                        frame.size.width,
+                        frame.size.height,
+                    ));
+                }
+            }
+            let _ = tx.send(frames);
+        })
+        .is_err()
+    {
+        return Vec::new();
+    }
+    rx.recv_timeout(Duration::from_secs(2))
+        .unwrap_or_default()
+}
+
+#[cfg(target_os = "macos")]
+fn show_macos_break_covering_each_screen(app: &tauri::AppHandle) {
+    let frames = macos_screen_frames(app);
+    for (i, _) in frames.iter().enumerate() {
+        let label = format!("{}{}", BREAK_WINDOW_PREFIX, i);
+        if app.get_webview_window(&label).is_none() {
+            create_break_window(
+                app,
+                &label,
+                tauri::PhysicalPosition { x: 0, y: 0 },
+                tauri::PhysicalSize {
+                    width: 800,
+                    height: 600,
+                },
+                1.0,
+                false,
+            );
+        }
+    }
+
+    let windows: Vec<_> = (0..frames.len())
+        .filter_map(|i| app.get_webview_window(&format!("{}{}", BREAK_WINDOW_PREFIX, i)))
+        .collect();
+    for window in &windows {
+        let _ = window.show();
+    }
+    let Some(anchor) = windows.first().cloned() else {
+        return;
+    };
+    let windows = windows.clone();
+    let _ = anchor.run_on_main_thread(move || {
+        use objc2::MainThreadMarker;
+        use objc2_app_kit::{
+            NSApplication, NSApplicationActivationPolicy, NSScreen, NSWindowAnimationBehavior,
+            NSWindowButton, NSWindowCollectionBehavior, NSWindowStyleMask, NSWindowTitleVisibility,
+        };
+
+        let Some(mtm) = MainThreadMarker::new() else {
+            return;
+        };
+        remember_frontmost_app();
+        // 先改策略，再把每一块屏幕（含 Mac 自带屏）的窗口放到对应屏幕上。
+        let _ = NSApplication::sharedApplication(mtm)
+            .setActivationPolicy(NSApplicationActivationPolicy::Accessory);
+
+        let screens = NSScreen::screens(mtm);
+        let level = shielding_window_level();
+        for (window, screen) in windows.iter().zip(screens.iter()) {
+            with_ns_window(window, |ns_window| {
+                let mut behavior = ns_window.collectionBehavior();
+                behavior.remove(NSWindowCollectionBehavior::MoveToActiveSpace);
+                behavior.remove(NSWindowCollectionBehavior::FullScreenPrimary);
+                behavior.remove(NSWindowCollectionBehavior::FullScreenNone);
+                behavior.insert(NSWindowCollectionBehavior::CanJoinAllSpaces);
+                behavior.insert(NSWindowCollectionBehavior::CanJoinAllApplications);
+                behavior.insert(NSWindowCollectionBehavior::FullScreenAuxiliary);
+                behavior.insert(NSWindowCollectionBehavior::Stationary);
+                ns_window.setCollectionBehavior(behavior);
+
+                let mut style = ns_window.styleMask();
+                style.insert(NSWindowStyleMask::NonactivatingPanel);
+                ns_window.setStyleMask(style);
+                ns_window.setAnimationBehavior(NSWindowAnimationBehavior::None);
+                ns_window.setHidesOnDeactivate(false);
+                ns_window.setTitleVisibility(NSWindowTitleVisibility::Hidden);
+                ns_window.setTitlebarAppearsTransparent(true);
+                for kind in [
+                    NSWindowButton::CloseButton,
+                    NSWindowButton::MiniaturizeButton,
+                    NSWindowButton::ZoomButton,
+                ] {
+                    if let Some(button) = ns_window.standardWindowButton(kind) {
+                        let _: () = unsafe { objc2::msg_send![&*button, setHidden: true] };
+                    }
+                }
+                ns_window.setFrame_display(screen.frame(), false);
+                ns_window.setLevel(level);
+                ns_window.setAcceptsMouseMovedEvents(true);
+                ns_window.orderFrontRegardless();
+                // 先成为 key window，WebKit 才会更新悬浮。再禁止激活应用，避免主屏被切走。
+                ns_window.makeKeyWindow();
+                let _: () = unsafe { objc2::msg_send![ns_window, _setPreventsActivation: true] };
+            });
+        }
+    });
+}
+
+#[cfg(target_os = "macos")]
+fn show_macos_break_overlay(
+    window: &tauri::WebviewWindow,
+    position: tauri::PhysicalPosition<i32>,
+    size: tauri::PhysicalSize<u32>,
+    scale: f64,
+) {
+    let window = window.clone();
+    let _ = window.clone().run_on_main_thread(move || {
+        use objc2_app_kit::{
+            NSScreenSaverWindowLevel, NSWindowAnimationBehavior, NSWindowButton,
+            NSWindowCollectionBehavior, NSWindowTitleVisibility,
+        };
+
+        use objc2::MainThreadMarker;
+        use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy, NSWindowStyleMask};
+
+        with_ns_window(&window, |ns_window| {
+            let mut behavior = ns_window.collectionBehavior();
+            behavior.remove(NSWindowCollectionBehavior::MoveToActiveSpace);
+            behavior.remove(NSWindowCollectionBehavior::FullScreenPrimary);
+            behavior.remove(NSWindowCollectionBehavior::FullScreenNone);
+            // 普通窗口进不了其他应用的全屏空间。CanJoinAllApplications 才能盖在那个空间上，且不切换桌面。
+            behavior.insert(NSWindowCollectionBehavior::CanJoinAllSpaces);
+            behavior.insert(NSWindowCollectionBehavior::CanJoinAllApplications);
+            behavior.insert(NSWindowCollectionBehavior::FullScreenAuxiliary);
+            behavior.insert(NSWindowCollectionBehavior::Stationary);
+            ns_window.setCollectionBehavior(behavior);
+
+            let mut style = ns_window.styleMask();
+            style.insert(NSWindowStyleMask::NonactivatingPanel);
+            ns_window.setStyleMask(style);
+            ns_window.setAnimationBehavior(NSWindowAnimationBehavior::None);
+            ns_window.setHidesOnDeactivate(false);
+            ns_window.setTitleVisibility(NSWindowTitleVisibility::Hidden);
+            ns_window.setTitlebarAppearsTransparent(true);
+            for kind in [
+                NSWindowButton::CloseButton,
+                NSWindowButton::MiniaturizeButton,
+                NSWindowButton::ZoomButton,
+            ] {
+                if let Some(button) = ns_window.standardWindowButton(kind) {
+                    let _: () = unsafe { objc2::msg_send![&*button, setHidden: true] };
+                }
+            }
+            let screen = ns_screen_for_monitor(position, size, scale).or_else(|| ns_window.screen());
+            if let Some(screen) = screen {
+                ns_window.setFrame_display(screen.frame(), false);
+            }
+            ns_window.setLevel(NSScreenSaverWindowLevel);
+            ns_window.orderFrontRegardless();
+        });
+
+        // 附属策略会把已经显示的窗口清掉，所以先改策略，全部窗口摆完后再统一置前。
+        if let Some(mtm) = MainThreadMarker::new() {
+            let _ = NSApplication::sharedApplication(mtm)
+                .setActivationPolicy(NSApplicationActivationPolicy::Accessory);
+        }
+    });
+}
+
+#[cfg(target_os = "macos")]
+fn ns_screen_for_monitor(
+    position: tauri::PhysicalPosition<i32>,
+    _size: tauri::PhysicalSize<u32>,
+    scale: f64,
+) -> Option<objc2::rc::Retained<objc2_app_kit::NSScreen>> {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::NSScreen;
+
+    let mtm = MainThreadMarker::new()?;
+    let screens = NSScreen::screens(mtm);
+    if screens.count() == 0 {
+        return None;
+    }
+    let primary = screens.objectAtIndex(0);
+    let primary_frame = primary.frame();
+    let primary_max_y = primary_frame.origin.y + primary_frame.size.height;
+    let scale = if scale > 0.0 { scale } else { 1.0 };
+    let target_x = position.x as f64 / scale;
+    let target_y = position.y as f64 / scale;
+
+    let mut best: Option<objc2::rc::Retained<NSScreen>> = None;
+    let mut best_dist = f64::MAX;
+    for screen in screens.iter() {
+        let frame = screen.frame();
+        // 不用物理尺寸比较。内置视网膜屏的尺寸会被缩放算两次，对不上点坐标，窗口就会被放到扩展屏上。
+        let cg_x = frame.origin.x;
+        let cg_y = primary_max_y - (frame.origin.y + frame.size.height);
+        let dist = (cg_x - target_x).powi(2) + (cg_y - target_y).powi(2);
+        if dist < best_dist {
+            best_dist = dist;
+            best = Some(screen.clone());
+        }
+    }
+    best
+}
+
+#[cfg(target_os = "macos")]
+fn remember_frontmost_app() {
+    use objc2_app_kit::{NSRunningApplication, NSWorkspace};
+
+    let Some(front) = NSWorkspace::sharedWorkspace().frontmostApplication() else {
+        return;
+    };
+    let Some(front_id) = front.bundleIdentifier() else {
+        return;
+    };
+    let ours = NSRunningApplication::currentApplication();
+    if ours
+        .bundleIdentifier()
+        .is_some_and(|bundle| bundle.to_string() == front_id.to_string())
+    {
+        return;
+    }
+    *PREVIOUS_FRONTMOST_BUNDLE.lock().unwrap() = Some(front_id.to_string());
+}
+
+#[cfg(target_os = "macos")]
+fn restore_previous_frontmost_app(window: &tauri::WebviewWindow) {
+    let window = window.clone();
+    let _ = window.run_on_main_thread(move || {
+        use objc2::MainThreadMarker;
+        use objc2_app_kit::{
+            NSApplication, NSApplicationActivationOptions, NSRunningApplication, NSWorkspace,
+        };
+        use objc2_foundation::NSString;
+
+        let Some(front) = NSWorkspace::sharedWorkspace().frontmostApplication() else {
+            return;
+        };
+        let ours = NSRunningApplication::currentApplication();
+        let we_are_front = match (front.bundleIdentifier(), ours.bundleIdentifier()) {
+            (Some(front_id), Some(our_id)) => front_id.to_string() == our_id.to_string(),
+            _ => false,
+        };
+        // 倒计时结束时前台仍是原来的应用，不要再激活一次。
+        if !we_are_front {
+            return;
+        }
+        let Some(bundle_id) = PREVIOUS_FRONTMOST_BUNDLE.lock().unwrap().take() else {
+            return;
+        };
+        let bundle = NSString::from_str(&bundle_id);
+        let Some(previous) = NSRunningApplication::runningApplicationsWithBundleIdentifier(&bundle)
+            .iter()
+            .next()
+        else {
+            return;
+        };
+        let Some(mtm) = MainThreadMarker::new() else {
+            return;
+        };
+        NSApplication::sharedApplication(mtm).yieldActivationToApplication(&previous);
+        let _ = previous.activateWithOptions(NSApplicationActivationOptions::ActivateAllWindows);
+    });
+}
+
+#[cfg(target_os = "macos")]
+fn restore_macos_activation_policy(window: &tauri::WebviewWindow) {
+    let window = window.clone();
+    let _ = window.run_on_main_thread(move || {
+        use objc2::MainThreadMarker;
+        use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy};
+
+        if let Some(mtm) = MainThreadMarker::new() {
+            let _ = NSApplication::sharedApplication(mtm)
+                .setActivationPolicy(NSApplicationActivationPolicy::Regular);
+        }
+    });
+}
+
+fn dismiss_break_window(window: &tauri::WebviewWindow) {
+    #[cfg(target_os = "macos")]
+    {
+        let window_for_order_out = window.clone();
+        let _ = window.clone().run_on_main_thread(move || {
+            use objc2_app_kit::NSNormalWindowLevel;
+
+            with_ns_window(&window_for_order_out, |ns_window| {
+                ns_window.setLevel(NSNormalWindowLevel);
+                ns_window.orderOut(None);
+            });
+        });
+        let _ = window.hide();
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = window.set_simple_fullscreen(false);
+        let _ = window.hide();
+    }
 }
 
 fn create_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), tauri::Error> {
@@ -560,14 +961,44 @@ fn show_config_window<R: Runtime>(app: &tauri::AppHandle<R>) {
 }
 
 fn send_break_notification(app: tauri::AppHandle) {
-    // 处理多语言国际化
     let i18n: I18nTexts = get_i18n_texts(&app);
-    let _ = app
-        .notification()
-        .builder()
-        .title(&i18n.notification_title)
-        .body(&i18n.notification_body)
-        .show();
+
+    #[cfg(target_os = "macos")]
+    {
+        // 开发时插件会把通知记到 Terminal，并在后台线程投递，Cursor 里启动时横幅不会出现。
+        send_macos_user_notification(&i18n.notification_title, &i18n.notification_body);
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = app
+            .notification()
+            .builder()
+            .title(&i18n.notification_title)
+            .body(&i18n.notification_body)
+            .show();
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn send_macos_user_notification(title: &str, body: &str) {
+    fn escape_applescript(value: &str) -> String {
+        value.replace('\\', "\\\\").replace('"', "\\\"")
+    }
+
+    // 左侧图标由发送进程决定。开发时这条通知由系统脚本发出，才能在当前 macOS 上弹出。
+    let script = format!(
+        "display notification \"{}\" with title \"{}\" sound name \"default\"",
+        escape_applescript(body),
+        escape_applescript(title)
+    );
+    let _ = std::process::Command::new("/usr/bin/osascript")
+        .arg("-e")
+        .arg(script)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::null())
+        .stderr(std::process::Stdio::null())
+        .spawn();
 }
 
 // 获取当前语言的辅助函数

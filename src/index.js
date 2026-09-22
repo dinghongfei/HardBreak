@@ -168,7 +168,15 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
 
 
-  document.getElementById("skip-btn").addEventListener("click", () => {
+  const skipBtn = document.getElementById("skip-btn");
+  // 休息窗不激活应用，系统不会再触发 :hover，改由鼠标进出切换样式。
+  skipBtn.addEventListener("mouseenter", () => {
+    skipBtn.classList.add("is-hover");
+  });
+  skipBtn.addEventListener("mouseleave", () => {
+    skipBtn.classList.remove("is-hover");
+  });
+  skipBtn.addEventListener("click", () => {
     // 跳过时，清除主窗口定时器 
     invoke("hide_break_window");
   });
