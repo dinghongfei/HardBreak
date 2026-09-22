@@ -10,6 +10,10 @@ lerna-debug.log*
 # Dependencies
 node_modules/
 
+# This repo uses pnpm. Do not commit other lockfiles.
+package-lock.json
+yarn.lock
+
 # Build output
 dist/
 dist-ssr/
