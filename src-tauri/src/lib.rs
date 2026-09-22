@@ -119,7 +119,7 @@ impl I18nTexts {
                 notification_body: "10秒後進入休息，請做好準備".to_string(),
             },
             "en" => Self {
-                tray_menu_config: "Setting".to_string(),
+                tray_menu_config: "Settings".to_string(),
                 tray_menu_quit: "Quit".to_string(),
                 notification_title: "HardBreak".to_string(),
                 notification_body: "Rest in 10 seconds, please prepare".to_string(),
@@ -370,6 +370,9 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(AppState::default())
         .setup(|app| {
+            #[cfg(target_os = "macos")]
+            hide_dock_icon();
+
             // 创建休息窗口
             create_break_window_on_all_monitors(app.handle());
 
@@ -459,9 +462,8 @@ fn hide_break_window_on_all_monitors(app: &tauri::AppHandle) {
     }
     #[cfg(target_os = "macos")]
     if let Some(window) = restore_from {
-        // 先把点击跳过时抢走的前台还给原来的应用，再恢复本应用的激活策略。
+        // 点击跳过若抢走了前台，还给休息前的应用。程序坞图标保持隐藏。
         restore_previous_frontmost_app(&window);
-        restore_macos_activation_policy(&window);
     }
     // 需要计算下一次要展示的文案,计算index,返回给前端
 
@@ -641,17 +643,14 @@ fn show_macos_break_covering_each_screen(app: &tauri::AppHandle) {
     let _ = anchor.run_on_main_thread(move || {
         use objc2::MainThreadMarker;
         use objc2_app_kit::{
-            NSApplication, NSApplicationActivationPolicy, NSScreen, NSWindowAnimationBehavior,
-            NSWindowButton, NSWindowCollectionBehavior, NSWindowStyleMask, NSWindowTitleVisibility,
+            NSScreen, NSWindowAnimationBehavior, NSWindowButton, NSWindowCollectionBehavior,
+            NSWindowStyleMask, NSWindowTitleVisibility,
         };
 
         let Some(mtm) = MainThreadMarker::new() else {
             return;
         };
         remember_frontmost_app();
-        // 先改策略，再把每一块屏幕（含 Mac 自带屏）的窗口放到对应屏幕上。
-        let _ = NSApplication::sharedApplication(mtm)
-            .setActivationPolicy(NSApplicationActivationPolicy::Accessory);
 
         let screens = NSScreen::screens(mtm);
         let level = shielding_window_level();
@@ -854,17 +853,15 @@ fn restore_previous_frontmost_app(window: &tauri::WebviewWindow) {
 }
 
 #[cfg(target_os = "macos")]
-fn restore_macos_activation_policy(window: &tauri::WebviewWindow) {
-    let window = window.clone();
-    let _ = window.run_on_main_thread(move || {
-        use objc2::MainThreadMarker;
-        use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy};
+fn hide_dock_icon() {
+    use objc2::MainThreadMarker;
+    use objc2_app_kit::{NSApplication, NSApplicationActivationPolicy};
 
-        if let Some(mtm) = MainThreadMarker::new() {
-            let _ = NSApplication::sharedApplication(mtm)
-                .setActivationPolicy(NSApplicationActivationPolicy::Regular);
-        }
-    });
+    let Some(mtm) = MainThreadMarker::new() else {
+        return;
+    };
+    let _ = NSApplication::sharedApplication(mtm)
+        .setActivationPolicy(NSApplicationActivationPolicy::Accessory);
 }
 
 fn dismiss_break_window(window: &tauri::WebviewWindow) {
