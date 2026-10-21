@@ -79,6 +79,7 @@ struct AppState {
     running: Mutex<bool>,
     current_phase: Mutex<TimerPhase>, // 使用枚举，避免魔法值
     remaining_seconds: Mutex<i32>,
+    restart_requested: Mutex<bool>,   // 请求立即重启计时，让新时长马上生效
 }
 
 impl Default for AppState {
@@ -88,6 +89,7 @@ impl Default for AppState {
             running: Mutex::new(false),
             current_phase: Mutex::new(TimerPhase::Work), // 使用枚举
             remaining_seconds: Mutex::new(0),
+            restart_requested: Mutex::new(false),
         }
     }
 }
@@ -241,6 +243,11 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                     return;
                 }
 
+                // 请求了立即重启：跳出当前倒计时，由外层 loop 按新时长重新开始
+                if *state.restart_requested.lock().unwrap() {
+                    break;
+                }
+
                 // ★ 新增：检查阶段是否被外部重置
                 let new_phase = state.current_phase.lock().unwrap().clone();
                 if new_phase != phase {
@@ -276,6 +283,21 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                 // println!("{:?} phase: {} seconds remaining", phase, remaining);
 
                 thread::sleep(Duration::from_secs(1));
+            }
+
+            // 检查是否请求了立即重启（让新时长马上生效）
+            let restart = {
+                let mut flag = state.restart_requested.lock().unwrap();
+                let requested = *flag;
+                *flag = false;
+                requested
+            };
+            if restart {
+                // 休息可能正在进行：收起休息窗并强制回到工作阶段。
+                // 由计时线程自己处理窗口，避免与阶段切换竞态。
+                hide_break_window_on_all_monitors(&app_clone);
+                *state.current_phase.lock().unwrap() = TimerPhase::Work;
+                continue;
             }
 
             // ★ 新增：检查阶段是否在倒计时期间被重置
@@ -337,6 +359,17 @@ fn hide_break_window(app: tauri::AppHandle) {
     *state.current_phase.lock().unwrap() = TimerPhase::Work;
 }
 
+/// 立即应用新的工作/休息时长：终止当前阶段，从工作阶段起点重新计时。
+/// 效果等同重启应用（一上来就是工作时间）。时长仍在阶段开始时读取，
+/// 这里只请求计时线程跳出当前倒计时，休息窗由计时线程负责收起。
+#[tauri::command]
+fn restart_timer_cycle(app: tauri::AppHandle) {
+    let state = app.state::<AppState>();
+
+    *state.current_phase.lock().unwrap() = TimerPhase::Work;
+    *state.restart_requested.lock().unwrap() = true;
+}
+
 
 #[tauri::command]
 fn get_app_version(app: tauri::AppHandle) -> String {
@@ -388,6 +421,7 @@ pub fn run() {
             update_settings,
             start_timer_cycle,
             hide_break_window,
+            restart_timer_cycle,
             get_app_version,
         ])
         .run(tauri::generate_context!())

@@ -21,6 +21,8 @@ const i18nMessages = {
         'config.tab.general.noSkip.label': '不可跳过模式',
         'config.tab.general.noSkip.tip': '开启后，休息不可跳过',
         'config.tab.general.language.label': '语言',
+        'config.tab.general.applyNow.btn': '立即生效',
+        'config.tab.general.applyNow.tip': '工作/休息时长默认从下一阶段开始生效。点击后立即按新时长从工作阶段重新计时，效果等同重启应用。',
         'config.tab.about.version.label': '版本',
         'config.tab.about.description.label': '描述',
         'config.tab.about.description.text': '一款帮助你养成良好工作休息习惯的应用，定时提醒你休息，保护你的健康。',
@@ -42,6 +44,8 @@ const i18nMessages = {
         'config.tab.general.noSkip.label': '不可跳過模式',
         'config.tab.general.noSkip.tip': '開啟後，休息不可跳過',
         'config.tab.general.language.label': '語言',
+        'config.tab.general.applyNow.btn': '立即生效',
+        'config.tab.general.applyNow.tip': '工作/休息時長預設從下一階段開始生效。點擊後立即依新時長從工作階段重新計時，效果等同重新啟動應用。',
         'config.tab.about.version.label': '版本',
         'config.tab.about.description.label': '描述',
         'config.tab.about.description.text': '一款幫助你養成良好工作休息習慣的應用，定時提醒你休息，保護你的健康。',
@@ -63,6 +67,8 @@ const i18nMessages = {
         'config.tab.general.noSkip.label': 'No-skip mode',
         'config.tab.general.noSkip.tip': 'Break cannot be skipped when enabled',
         'config.tab.general.language.label': 'Language',
+        'config.tab.general.applyNow.btn': 'Apply Now',
+        'config.tab.general.applyNow.tip': 'New durations apply from the next work/break phase by default. Click to restart timing from the work phase with the new durations immediately — same as relaunching the app.',
         'config.tab.about.version.label': 'Version',
         'config.tab.about.description.label': 'Description',
         'config.tab.about.description.text': 'An app that helps you develop good work-break habits, reminding you to take breaks regularly to protect your health.',
@@ -218,6 +224,21 @@ window.addEventListener("DOMContentLoaded", async () => {
     const statusLableEl = document.getElementById('status-label');
     const statusNumberEl = document.getElementById('status-number');
 
+    // 「立即生效」按钮状态：current* 是滑块当前值，effective* 是已生效值。
+    // 两者不一致（用户拖过滑块）才展示按钮。
+    let currentWorkDuration = parseInt(settings.work_duration) || 25;
+    let currentBreakDuration = parseInt(settings.break_duration) || 5;
+    let effectiveWorkDuration = currentWorkDuration;
+    let effectiveBreakDuration = currentBreakDuration;
+    let lastPhase = null;
+
+    const applyNowContainer = document.querySelector('.apply-now-container');
+    function updateApplyNowVisibility() {
+        const dirty = currentWorkDuration !== effectiveWorkDuration
+            || currentBreakDuration !== effectiveBreakDuration;
+        applyNowContainer.classList.toggle('visible', dirty);
+    }
+
     listen('app-state-update', (event) => {
 
         const { phase, remaining, current_language } = event.payload;
@@ -231,6 +252,17 @@ window.addEventListener("DOMContentLoaded", async () => {
         const minutes = Math.floor(remaining / 60);
         const seconds = remaining % 60;
         statusNumberEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        // 阶段自然切换后，对应阶段的时长已经开始生效，同步基准值
+        if (lastPhase !== null && phase !== lastPhase) {
+            if (phase === 'break') {
+                effectiveBreakDuration = currentBreakDuration;
+            } else {
+                effectiveWorkDuration = currentWorkDuration;
+            }
+            updateApplyNowVisibility();
+        }
+        lastPhase = phase;
 
     })
 
@@ -261,7 +293,11 @@ window.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('workSliderFill'),
         document.getElementById('workDurationValue'),
         1, 120,
-        (value) => saveSetting('work_duration', value)
+        (value) => {
+            saveSetting('work_duration', value);
+            currentWorkDuration = value;
+            updateApplyNowVisibility();
+        }
     );
     workSlider.updatePosition((workDuration / 120) * 100);
 
@@ -271,7 +307,11 @@ window.addEventListener("DOMContentLoaded", async () => {
         document.getElementById('breakSliderFill'),
         document.getElementById('breakDurationValue'),
         1, 60,
-        (value) => saveSetting('break_duration', value)
+        (value) => {
+            saveSetting('break_duration', value);
+            currentBreakDuration = value;
+            updateApplyNowVisibility();
+        }
     );
     breakSlider.updatePosition((breakDuration / 60) * 100);
 
@@ -319,6 +359,15 @@ window.addEventListener("DOMContentLoaded", async () => {
         const language = e.target.value;
         languageChanged(language);
         saveSetting('language', language);
+    });
+
+    // 时长立即生效：回到工作阶段起点，按新时长重新计时（等同重启应用）
+    document.getElementById('applyNowBtn').addEventListener('click', () => {
+        invoke('restart_timer_cycle');
+        // 新时长已立即生效：同步基准值并隐藏按钮
+        effectiveWorkDuration = currentWorkDuration;
+        effectiveBreakDuration = currentBreakDuration;
+        updateApplyNowVisibility();
     });
 
 

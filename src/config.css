@@ -257,6 +257,45 @@ body {
     box-shadow: 0 2px 6px rgba(52, 199, 89, 0.3);
 }
 
+/* 时长立即生效按钮：默认隐藏，拖过工作/休息时长滑块后才展示 */
+.apply-now-container {
+    display: none;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.apply-now-container.visible {
+    display: block;
+}
+
+.apply-now-btn {
+    width: 100%;
+    padding: 10px 0;
+    background: #007aff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.apply-now-btn:hover {
+    background: #0066d6;
+}
+
+.apply-now-btn:active {
+    background: #005bbf;
+}
+
+.apply-now-tip {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
 /* 开关 */
 .toggle-switch {
     position: relative;
