@@ -512,7 +512,7 @@ fn hide_break_window_on_all_monitors(app: &tauri::AppHandle) {
     // 需要计算下一次要展示的文案,计算index,返回给前端
 
     let mut rng = rand::rng();
-    let index = rng.random_range(0..10); // 生成 [0, 10) 的随机整数
+    let index = rng.random_range(0..30); // 生成 [0, 30) 的随机整数，对应三种语言各 30 条提示
 
     // 通知前端：休息已跳过，开始工作阶段
     let _ = app.emit(
