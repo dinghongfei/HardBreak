@@ -150,6 +150,12 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* 字体中冒号以 x 高居中，相对数字偏下；上移使其与数字视觉居中 */
+.time-colon {
+  display: inline-block;
+  transform: translateY(-0.08em);
+}
+
 
 .countdown-text-box-label {
   font-size: 0.875rem; /* 14px */

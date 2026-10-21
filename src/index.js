@@ -206,6 +206,8 @@ function languageChanged(language) {
 window.addEventListener("DOMContentLoaded", async () => {
 
   const timeEl = document.querySelector('.countdown-text-box-time');
+  const timeMinutesEl = timeEl.querySelector('.time-minutes');
+  const timeSecondsEl = timeEl.querySelector('.time-seconds');
   const progressEl = document.querySelector('.countdown-circle-progress');
 
   // 圆环周长: r=90, 周长=2*PI*90≈565.4867
@@ -248,7 +250,8 @@ window.addEventListener("DOMContentLoaded", async () => {
       setFlipDigit(flipDigits[2], seconds[0]);
       setFlipDigit(flipDigits[3], seconds[1]);
     } else {
-      timeEl.textContent = `${minutes}:${seconds}`;
+      timeMinutesEl.textContent = minutes;
+      timeSecondsEl.textContent = seconds;
       const progress = breakState.duration > 0 ? remaining / breakState.duration : 0;
       progressEl.setAttribute('stroke-dashoffset', Math.max(0, circumference * (1 - progress)));
     }
