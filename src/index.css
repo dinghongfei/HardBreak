@@ -132,12 +132,8 @@ body {
   height: 100%;
   transform: rotate(-90deg);
 }
-.countdown-circle-progress {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-  transition-duration: 1000ms;
-}
+/* 圆环进度由 index.js 的 requestAnimationFrame 逐帧驱动，
+   不能加 CSS transition：否则每帧的 attribute 更新都会重新触发过渡，画面反而滞后 */
 
 .countdown-text-box {
   position: absolute;

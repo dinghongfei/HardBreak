@@ -116,6 +116,35 @@ window.addEventListener("DOMContentLoaded", async () => {
   const timeEl = document.querySelector('.countdown-text-box-time');
   const progressEl = document.querySelector('.countdown-circle-progress');
 
+  // 圆环周长: r=90, 周长=2*PI*90≈565.4867
+  // offset=0 表示满环, offset=周长表示空环
+  const circumference = 2 * Math.PI * 90;
+
+  // 最近一次 break 阶段事件的状态，作为本地逐帧插值的基准
+  let breakState = null; // { duration, remaining, receivedAt }
+  let rafRunning = false;
+
+  // 用 requestAnimationFrame 逐帧插值，圆环匀速消退，不再按秒抖动
+  function smoothRender() {
+    if (!breakState) {
+      rafRunning = false;
+      return;
+    }
+    const elapsed = (performance.now() - breakState.receivedAt) / 1000;
+    const remaining = Math.max(0, breakState.remaining - elapsed);
+
+    // 倒计时文字仍按整秒显示
+    const totalSeconds = Math.ceil(remaining);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    timeEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+    const progress = breakState.duration > 0 ? remaining / breakState.duration : 0;
+    progressEl.setAttribute('stroke-dashoffset', Math.max(0, circumference * (1 - progress)));
+
+    requestAnimationFrame(smoothRender);
+  }
+
 
   // languageChanged('en');
 
@@ -131,20 +160,16 @@ window.addEventListener("DOMContentLoaded", async () => {
 
       no_skip_mode ? updateNoKipMode(true) : updateNoKipMode(false);
 
-      // 更新倒计时
-      const minutes = Math.floor(remaining / 60);
-      const seconds = remaining % 60;
-      timeEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      // 记录插值基准并启动逐帧渲染，每秒由新事件自动校准
+      breakState = { duration, remaining, receivedAt: performance.now() };
+      if (!rafRunning) {
+        rafRunning = true;
+        requestAnimationFrame(smoothRender);
+      }
 
-      // 计算圆环进度: r=90, 周长=2*PI*90≈565.4867
-      // offset=0 表示满环, offset=周长表示空环
-      const circumference = 2 * Math.PI * 90;
-      // 使用 data 属性存储总时长以便计算比例
-      const progress = remaining / duration;
-      const offset = circumference * (1 - progress);
-      progressEl.setAttribute('stroke-dashoffset', Math.max(0, offset));
-
-
+    } else {
+      // 非休息阶段（工作/跳过）停止插值渲染
+      breakState = null;
     }
   })
 
