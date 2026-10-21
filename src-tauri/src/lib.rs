@@ -57,6 +57,7 @@ struct AppSettings {
     no_skip_mode: bool,
     first_run: bool,
     language: String,
+    countdown_mode: String, // "ring"（圆环）| "flipclock"（翻页时钟）
 }
 
 impl Default for AppSettings {
@@ -68,6 +69,7 @@ impl Default for AppSettings {
             no_skip_mode: false,
             first_run: false,
             language: "zh-CN".to_string(),
+            countdown_mode: "ring".to_string(),
         }
     }
 }
@@ -267,6 +269,7 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                         "remaining": remaining,
                         "no_skip_mode": state.settings.lock().unwrap().no_skip_mode,
                         "current_language": state.settings.lock().unwrap().language,
+                        "countdown_mode": state.settings.lock().unwrap().countdown_mode,
                     }),
                 );
 
@@ -389,6 +392,12 @@ pub fn run() {
             sql: include_str!("../sqls/01_init.sql"),
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 2,
+            description: "add_countdown_mode",
+            sql: include_str!("../sqls/02_add_countdown_mode.sql"),
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
@@ -473,6 +482,7 @@ fn show_break_window_on_all_monitors(app: &tauri::AppHandle) {
             "remaining": duration_seconds,
             "no_skip_mode": settings.no_skip_mode,
             "current_language": settings.language,
+            "countdown_mode": settings.countdown_mode,
         }),
     );
     drop(settings);

@@ -16,6 +16,7 @@
         <div class="tab-header">
             <nav class="tab-nav">
                 <button class="tab-btn active" data-tab="general" data-translate="config.tab.general">常规</button>
+                <button class="tab-btn" data-tab="break-window" data-translate="config.tab.breakWindow">休息窗</button>
                 <!-- <button class="tab-btn" data-tab="tips" data-translate="config.tab.tips">休息提示</button> -->
                 <button class="tab-btn" data-tab="about" data-translate="config.tab.about">关于</button>
             </nav>
@@ -138,6 +139,38 @@
                     <span class="select-arrow">▼</span>
                 </div>
             </div>
+        </div>
+
+        <!-- 休息窗设置：倒计时样式（后续支持提示语） -->
+        <div class="tab-content" id="break-window">
+            <div class="countdown-mode-list">
+                <div class="countdown-mode-card" data-mode="ring">
+                    <div class="mode-preview">
+                        <!-- 与休息窗一致：深色底衬、半透明白轨道、绿色进度弧、中央时间 -->
+                        <div class="mini-ring">
+                            <svg viewBox="0 0 48 48" class="mini-ring-svg">
+                                <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2" />
+                                <circle cx="24" cy="24" r="19" fill="none" stroke="#4ade80" stroke-width="2"
+                                    stroke-dasharray="119.381" stroke-dashoffset="30" stroke-linecap="round"
+                                    transform="rotate(-90 24 24)" />
+                            </svg>
+                            <span class="mini-ring-time">05:00</span>
+                        </div>
+                    </div>
+                    <span class="mode-name" data-translate="config.tab.breakWindow.mode.ring">圆环</span>
+                </div>
+                <div class="countdown-mode-card" data-mode="flipclock">
+                    <div class="mode-preview mode-preview-flip">
+                        <div class="mini-flip-card"><span>0</span></div>
+                        <div class="mini-flip-card"><span>5</span></div>
+                        <div class="mini-flip-colon"><span></span><span></span></div>
+                        <div class="mini-flip-card"><span>0</span></div>
+                        <div class="mini-flip-card"><span>0</span></div>
+                    </div>
+                    <span class="mode-name" data-translate="config.tab.breakWindow.mode.flipclock">翻页时钟</span>
+                </div>
+            </div>
+            <p class="countdown-mode-tip" data-translate="config.tab.breakWindow.tip">选择休息窗的倒计时样式，切换后立即生效。</p>
         </div>
 
         <!-- 休息提示 -->

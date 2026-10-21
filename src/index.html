@@ -17,8 +17,8 @@
       <!-- 二级提示 -->
       <p id="level-2-tip" class="level-2-tip">补充水分，清醒头脑</p>
 
-      <!-- 倒计时UI -->
-      <div class="countdown">
+      <!-- 倒计时UI：圆环 -->
+      <div class="countdown" id="countdown-ring">
         <!-- 背景圆环 -->
         <svg class="countdown-circle">
           <circle cx="112" cy="112" r="90" stroke="rgba(255,255,255,0.5)" stroke-width="8" fill="none" />
@@ -35,6 +35,30 @@
           </span>
           <span class="countdown-text-box-label" data-translate="break.countdown.label">剩余时间</span>
         </div>
+      </div>
+
+      <!-- 倒计时UI：翻页时钟 -->
+      <div class="flipclock" id="countdown-flipclock" style="display: none;">
+        <div class="flipclock-cards">
+          <div class="flip-digit" id="flip-m1" data-value="0">
+            <div class="flip-half flip-top"><span>0</span></div>
+            <div class="flip-half flip-bottom"><span>0</span></div>
+          </div>
+          <div class="flip-digit" id="flip-m2" data-value="0">
+            <div class="flip-half flip-top"><span>0</span></div>
+            <div class="flip-half flip-bottom"><span>0</span></div>
+          </div>
+          <div class="flip-colon"><span></span><span></span></div>
+          <div class="flip-digit" id="flip-s1" data-value="0">
+            <div class="flip-half flip-top"><span>0</span></div>
+            <div class="flip-half flip-bottom"><span>0</span></div>
+          </div>
+          <div class="flip-digit" id="flip-s2" data-value="0">
+            <div class="flip-half flip-top"><span>0</span></div>
+            <div class="flip-half flip-bottom"><span>0</span></div>
+          </div>
+        </div>
+        <span class="countdown-text-box-label" data-translate="break.countdown.label">剩余时间</span>
       </div>
 
       <!-- 休息提示 -->

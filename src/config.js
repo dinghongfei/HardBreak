@@ -23,6 +23,10 @@ const i18nMessages = {
         'config.tab.general.language.label': '语言',
         'config.tab.general.applyNow.btn': '立即生效',
         'config.tab.general.applyNow.tip': '工作/休息时长默认从下一阶段开始生效。点击后立即按新时长从工作阶段重新计时，效果等同重启应用。',
+        'config.tab.breakWindow': '休息窗',
+        'config.tab.breakWindow.mode.ring': '圆环',
+        'config.tab.breakWindow.mode.flipclock': '翻页时钟',
+        'config.tab.breakWindow.tip': '选择休息窗的倒计时样式，切换后立即生效。',
         'config.tab.about.version.label': '版本',
         'config.tab.about.description.label': '描述',
         'config.tab.about.description.text': '一款帮助你养成良好工作休息习惯的应用，定时提醒你休息，保护你的健康。',
@@ -46,6 +50,10 @@ const i18nMessages = {
         'config.tab.general.language.label': '語言',
         'config.tab.general.applyNow.btn': '立即生效',
         'config.tab.general.applyNow.tip': '工作/休息時長預設從下一階段開始生效。點擊後立即依新時長從工作階段重新計時，效果等同重新啟動應用。',
+        'config.tab.breakWindow': '休息窗',
+        'config.tab.breakWindow.mode.ring': '圓環',
+        'config.tab.breakWindow.mode.flipclock': '翻頁時鐘',
+        'config.tab.breakWindow.tip': '選擇休息窗的倒計時樣式，切換後立即生效。',
         'config.tab.about.version.label': '版本',
         'config.tab.about.description.label': '描述',
         'config.tab.about.description.text': '一款幫助你養成良好工作休息習慣的應用，定時提醒你休息，保護你的健康。',
@@ -69,6 +77,10 @@ const i18nMessages = {
         'config.tab.general.language.label': 'Language',
         'config.tab.general.applyNow.btn': 'Apply Now',
         'config.tab.general.applyNow.tip': 'New durations apply from the next work/break phase by default. Click to restart timing from the work phase with the new durations immediately — same as relaunching the app.',
+        'config.tab.breakWindow': 'Break Window',
+        'config.tab.breakWindow.mode.ring': 'Ring',
+        'config.tab.breakWindow.mode.flipclock': 'Flip Clock',
+        'config.tab.breakWindow.tip': 'Choose the countdown style for break windows. Applies immediately.',
         'config.tab.about.version.label': 'Version',
         'config.tab.about.description.label': 'Description',
         'config.tab.about.description.text': 'An app that helps you develop good work-break habits, reminding you to take breaks regularly to protect your health.',
@@ -117,6 +129,7 @@ async function syncSettingsToBackend() {
         no_skip_mode: settings.no_skip_mode === '1',
         first_run: settings.first_run === '1',
         language: settings.language || 'zh-CN',
+        countdown_mode: settings.countdown_mode || 'ring',
     };
 
     await invoke('update_settings', { settings: backendSettings });
@@ -368,6 +381,19 @@ window.addEventListener("DOMContentLoaded", async () => {
         effectiveWorkDuration = currentWorkDuration;
         effectiveBreakDuration = currentBreakDuration;
         updateApplyNowVisibility();
+    });
+
+    // 倒计时样式选择：点击卡片保存，随下一次 app-state-update（≤1秒）同步到休息窗
+    const savedCountdownMode = settings.countdown_mode || 'ring';
+    document.querySelectorAll('.countdown-mode-card').forEach(card => {
+        if (card.dataset.mode === savedCountdownMode) {
+            card.classList.add('active');
+        }
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.countdown-mode-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            saveSetting('countdown_mode', card.dataset.mode);
+        });
     });
 
 

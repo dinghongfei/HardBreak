@@ -95,6 +95,38 @@ function resetProgress() {
 
 }
 
+// 翻页时钟：数字变化时播放翻页动画。每秒渲染都会调用，值没变就直接返回。
+function setFlipDigit(digitEl, value) {
+  if (digitEl.dataset.value === value) return;
+  const previous = digitEl.dataset.value || '0';
+  digitEl.dataset.value = value;
+
+  const topSpan = digitEl.querySelector('.flip-top span');
+  const bottomSpan = digitEl.querySelector('.flip-bottom span');
+
+  // 上翻页：旧数字向下翻走，露出下面的新数字
+  const flapTop = document.createElement('div');
+  flapTop.className = 'flip-half flip-flap-top';
+  flapTop.innerHTML = `<span>${previous}</span>`;
+
+  // 下翻页：新数字从中线落下
+  const flapBottom = document.createElement('div');
+  flapBottom.className = 'flip-half flip-flap-bottom';
+  flapBottom.innerHTML = `<span>${value}</span>`;
+
+  // 静态上半立即换成新数字（被上翻页盖住，随翻页揭开）
+  topSpan.textContent = value;
+
+  digitEl.appendChild(flapTop);
+  digitEl.appendChild(flapBottom);
+
+  flapTop.addEventListener('animationend', () => flapTop.remove());
+  flapBottom.addEventListener('animationend', () => {
+    bottomSpan.textContent = value;
+    flapBottom.remove();
+  });
+}
+
 
 
 function languageChanged(language) {
@@ -120,6 +152,18 @@ window.addEventListener("DOMContentLoaded", async () => {
   // offset=0 表示满环, offset=周长表示空环
   const circumference = 2 * Math.PI * 90;
 
+  // 倒计时样式：ring（圆环，默认）/ flipclock（翻页时钟）
+  const ringEl = document.getElementById('countdown-ring');
+  const flipclockEl = document.getElementById('countdown-flipclock');
+  const flipDigits = ['flip-m1', 'flip-m2', 'flip-s1', 'flip-s2'].map(id => document.getElementById(id));
+  let countdownMode = 'ring';
+
+  function applyCountdownMode(mode) {
+    const flip = mode === 'flipclock';
+    ringEl.style.display = flip ? 'none' : '';
+    flipclockEl.style.display = flip ? '' : 'none';
+  }
+
   // 最近一次 break 阶段事件的状态，作为本地逐帧插值的基准
   let breakState = null; // { duration, remaining, receivedAt }
   let rafRunning = false;
@@ -135,12 +179,19 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     // 倒计时文字仍按整秒显示
     const totalSeconds = Math.ceil(remaining);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    timeEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
 
-    const progress = breakState.duration > 0 ? remaining / breakState.duration : 0;
-    progressEl.setAttribute('stroke-dashoffset', Math.max(0, circumference * (1 - progress)));
+    if (countdownMode === 'flipclock') {
+      setFlipDigit(flipDigits[0], minutes[0]);
+      setFlipDigit(flipDigits[1], minutes[1]);
+      setFlipDigit(flipDigits[2], seconds[0]);
+      setFlipDigit(flipDigits[3], seconds[1]);
+    } else {
+      timeEl.textContent = `${minutes}:${seconds}`;
+      const progress = breakState.duration > 0 ? remaining / breakState.duration : 0;
+      progressEl.setAttribute('stroke-dashoffset', Math.max(0, circumference * (1 - progress)));
+    }
 
     requestAnimationFrame(smoothRender);
   }
@@ -149,10 +200,16 @@ window.addEventListener("DOMContentLoaded", async () => {
   // languageChanged('en');
 
   listen('app-state-update', async (event) => {
-    const { phase, duration, remaining, no_skip_mode, current_language} = event.payload;
+    const { phase, duration, remaining, no_skip_mode, current_language, countdown_mode = 'ring' } = event.payload;
     if (language_argument !== current_language) {
       language_argument = current_language;
       languageChanged(current_language);
+    }
+
+    // 倒计时样式实时切换（任何阶段都跟随，休息开始时就是正确的样式）
+    if (countdownMode !== countdown_mode) {
+      countdownMode = countdown_mode;
+      applyCountdownMode(countdownMode);
     }
 
 

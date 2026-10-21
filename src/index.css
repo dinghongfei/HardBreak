@@ -158,6 +158,152 @@ body {
   margin-top: 0.5rem; /* 8px */
 }
 
+/* ==================== 翻页时钟 ==================== */
+.flipclock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem; /* 32px，与圆环占位一致 */
+  margin-bottom: 2rem; /* 32px */
+}
+
+.flipclock-cards {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem; /* 10px */
+  margin-bottom: 1rem; /* 16px */
+}
+
+.flip-digit {
+  position: relative;
+  width: 6.25rem; /* 100px */
+  height: 9rem; /* 144px */
+  perspective: 400px;
+}
+
+/* 数字中间的铰链横线（经典翻页钟分割线），翻页动画时保持可见 */
+.flip-digit::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 3px;
+  margin-top: -1.5px;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.flip-half {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #292524, #1c1917);
+}
+
+.flip-top,
+.flip-flap-top {
+  top: 0;
+  border-radius: 0.5rem 0.5rem 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+}
+
+.flip-bottom,
+.flip-flap-bottom {
+  bottom: 0;
+  border-radius: 0 0 0.5rem 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top: none;
+}
+
+.flip-half span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 200%; /* 占满整张卡片，文字中心对准卡片中线 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5.75rem; /* 92px */
+  font-weight: 700;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+}
+
+.flip-top span,
+.flip-flap-top span {
+  top: 0;
+}
+
+.flip-bottom span,
+.flip-flap-bottom span {
+  bottom: 0;
+}
+
+/* 上翻页：旧数字绕中线向下翻走 */
+.flip-flap-top {
+  z-index: 2;
+  transform-origin: center bottom;
+  backface-visibility: hidden;
+  animation: flip-top-down 0.25s ease-in forwards;
+}
+
+/* 下翻页：新数字从中线落下 */
+.flip-flap-bottom {
+  z-index: 2;
+  transform-origin: center top;
+  transform: rotateX(90deg);
+  backface-visibility: hidden;
+  animation: flip-bottom-down 0.25s ease-out 0.25s forwards;
+}
+
+@keyframes flip-top-down {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes flip-bottom-down {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+
+.flip-colon {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* 24px */
+  padding: 0 0.375rem; /* 6px */
+}
+
+.flip-colon span {
+  width: 0.75rem; /* 12px */
+  height: 0.75rem; /* 12px */
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  animation: colon-blink 1s ease-in-out infinite;
+}
+
+@keyframes colon-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
 
 .rest-text-box {
   margin-bottom: 0.5rem; /* 8px */
