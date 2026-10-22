@@ -39,21 +39,21 @@ pnpm tauri build
 
 写入必须走 `src/config.js` 的 `saveSetting`：先 `UPDATE settings`，再同步后端。不要只改数据库或只改 `AppState`。
 
-键：`work_duration`、`break_duration`、`notify_before_break`、`no_skip_mode`、`first_run`、`language`。时长单位是分钟，库里开关和 `first_run` 是 `'1'` / `'0'`。工作滑块 1–120，休息滑块 1–60。时长在**下一阶段开始**时读取，不要在当前倒计时中途重置 `remaining`。
+键：`work_duration`、`break_duration`、`notify_before_break`、`no_skip_mode`、`first_run`、`language`、`countdown_mode`。时长单位是分钟，库里开关和 `first_run` 是 `'1'` / `'0'`，`countdown_mode` 是 `'ring'` / `'flipclock'`。工作滑块 1–120，休息滑块 1–60。时长在**下一阶段开始**时读取，不要在当前倒计时中途重置 `remaining`。
 
 已安装用户不会重跑 version 1 迁移。改默认值可以改 `01_init.sql`（只影响新库）。给已有库加键时新增一条 `Migration`，不要改已发布的 version 1 SQL 指望它再执行。
 
 ## 计时与窗口
 
-`start_timer_cycle` 用 `running` 防重入，只能启动一次。停止命令目前是注释掉的。
+`start_timer_cycle` 用 `running` 防重入，只能启动一次。`restart_timer_cycle` 用于「立即生效」：置 `restart_requested` 并回到 `Work` 阶段，由计时线程收标志、收起休息窗后按新时长重新开始。
 
 每秒发送 `app-state-update`：
 
 ```json
-{ "phase": "work|break", "duration": 1500, "remaining": 1499, "no_skip_mode": false, "current_language": "zh-CN" }
+{ "phase": "work|break", "duration": 1500, "remaining": 1499, "no_skip_mode": false, "current_language": "zh-CN", "countdown_mode": "ring" }
 ```
 
-`duration` 和 `remaining` 是秒。工作阶段 `remaining == 10` 且 `notify_before_break` 时发系统通知。
+`duration` 和 `remaining` 是秒，倒计时按墙钟（`Instant`）推进，系统休眠唤醒后按真实流逝时间计算。工作阶段 `remaining <= 10` 且 `notify_before_break` 时发一次系统通知。
 
 - 工作结束：显示所有休息窗，发送 `break_start`。
 - 休息结束：隐藏休息窗，发送 `work_start`：`{ "tips_index": 0, "current_language": "zh-CN" }`。
@@ -65,7 +65,7 @@ pnpm tauri build
 
 ## 命令
 
-`invoke_handler`：`update_settings`、`start_timer_cycle`、`hide_break_window`、`get_app_version`。
+`invoke_handler`：`update_settings`、`start_timer_cycle`、`hide_break_window`、`restart_timer_cycle`、`get_app_version`。
 
 `removeUnusedCommands` 为 true。新命令必须放进 `generate_handler!`，并在 `src/` 里被 `invoke`，否则会被裁掉。
 
@@ -79,9 +79,9 @@ pnpm tauri build
 - 配置窗：`src/config.js` 的 `i18nMessages`
 - 托盘菜单和休息前通知：`lib.rs` 的 `I18nTexts`
 
-休息提示是 `index.js` 里三种语言各 10 条常量，下标来自 `lib.rs` 的 `rand::random_range(0..10)`。增删提示时三份数组长度必须相同，并改这个区间。
+休息提示是 `index.js` 里三种语言各 30 条常量，下标来自 `lib.rs` 的 `rand::random_range(0..30)`。增删提示时三份数组长度必须相同，并改这个区间。
 
-`config.html` 里「休息提示」标签按钮是注释掉的。该页的增删改只改 DOM，不落库，休息窗也不读它。不要把这页当成提示数据源，除非提示改为持久化并由休息窗读取。
+配置窗没有提示语编辑页（旧的静态页面已删除）。未来做提示语设置时放到「休息窗」标签下，持久化到数据库并由休息窗读取；macOS 的 WKWebView 不支持 `prompt()`，编辑弹窗用自绘 UI。
 
 这是原生 HTML，属性用 `class`，不要写 `className`。
 

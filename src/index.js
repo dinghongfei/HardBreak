@@ -2,7 +2,7 @@ const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 
 
-// 提示语列表（纯中文）,增加后,无比修改lib.rs 中计算提示语index的逻辑
+// 提示语列表（简体中文）。增删后务必同步修改 lib.rs 中计算提示语 index 的随机区间，并保持三种语言条数一致
 const tipsZHCN = [
   { primary: '停下来，歇一歇', secondary: '让眼睛和身体都喘口气' },
   { primary: '远眺窗外', secondary: '看看远处的绿色，放松睫状肌' },
@@ -127,16 +127,19 @@ const i18nMessages = {
 
 
 let language_argument = 'zh-CN';
+// 当前展示的提示语下标（来自 lib.rs 的随机数），语言切换时保持原下标
+let currentTipsIndex = 0;
 
 
-function randomizeTips(index = 0, language = 'zh-CN') {
+function randomizeTips(index = currentTipsIndex, language = 'zh-CN') {
+  currentTipsIndex = index;
   // 随机选择提示语
   const tip = language === 'zh-CN' ? tipsZHCN[index] : language === 'zh-TW' ? tipsZHTW[index] : tipsEn[index];
   document.getElementById('level-1-tip').textContent = tip.primary;
   document.getElementById('level-2-tip').textContent = tip.secondary;
 }
 
-function updateNoKipMode(noSkipMode) {
+function updateNoSkipMode(noSkipMode) {
   const lockTip = document.getElementById('lock-tip');
   const skipBtn = document.getElementById('skip-btn');
 
@@ -190,8 +193,8 @@ function setFlipDigit(digitEl, value) {
 
 
 function languageChanged(language) {
-  console.log(`languageChanged: ${language}`);
-  randomizeTips(0, language);
+  // 保持当前提示语下标，只换语言重新渲染
+  randomizeTips(currentTipsIndex, language);
 
   const i18n = i18nMessages[language] || i18nMessages.en;
 
@@ -278,7 +281,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     if (phase === 'break') {
 
-      no_skip_mode ? updateNoKipMode(true) : updateNoKipMode(false);
+      updateNoSkipMode(no_skip_mode);
 
       // 记录插值基准并启动逐帧渲染，每秒由新事件自动校准
       breakState = { duration, remaining, receivedAt: performance.now() };
@@ -293,17 +296,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     }
   })
 
-  // 新增：监听配置变更事件
-  listen('break_start', async () => {
-
-  });
-
-
-
-
-  // 新增：监听配置变更事件
+  // 工作阶段开始：重置提示语和进度
   listen('work_start', async (event) => {
-    // 文案重置
     const { tips_index, current_language } = event.payload;
 
     randomizeTips(tips_index, current_language);

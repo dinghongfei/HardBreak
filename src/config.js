@@ -89,11 +89,14 @@ const i18nMessages = {
 
 
 
-async function loadDatabase() {
-    const Database = window.__TAURI__.sql;
-
-    const db = await Database.load("sqlite:config.db");
-    return db;
+// 缓存数据库连接，避免每次读写都重新加载
+let dbPromise = null;
+function loadDatabase() {
+    if (!dbPromise) {
+        const Database = window.__TAURI__.sql;
+        dbPromise = Database.load("sqlite:config.db");
+    }
+    return dbPromise;
 }
 
 async function saveSetting(key, value) {
@@ -160,10 +163,12 @@ function initSlider(thumb, fill, valueEl, min, max, onDragEnd) {
         updatePosition(percent);
     };
 
+    let dragEndedAt = 0;
     thumb.addEventListener('mousedown', () => isDragging = true);
     document.addEventListener('mouseup', () => {
         if (isDragging && onDragEnd) {
             onDragEnd(currentValue);
+            dragEndedAt = Date.now();
         }
         isDragging = false;
     });
@@ -172,6 +177,8 @@ function initSlider(thumb, fill, valueEl, min, max, onDragEnd) {
     });
 
     track.addEventListener('click', (e) => {
+        // 拖拽刚结束时浏览器会补发一次 click，mouseup 里已保存过，跳过避免重复写库
+        if (Date.now() - dragEndedAt < 100) return;
         handleMove(e.clientX);
         if (onDragEnd) onDragEnd(currentValue);
     });
@@ -201,8 +208,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     if (settings.first_run) {
         const systemLocale = await locale() || 'zh-CN';
-        const language = systemLocale.includes('zh') ? (systemLocale === 'zh-CN' ? 'zh-CN' : 'zh-TW') : 'en'
-        // const language = 'en'
+        // 繁体地区/字形（zh-Hant、zh-TW/HK/MO）用 zh-TW，其余中文（含 zh-Hans）一律 zh-CN
+        const language = /zh[-_]?(hant|tw|hk|mo)/i.test(systemLocale)
+            ? 'zh-TW'
+            : systemLocale.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en';
 
         // 第一次访问，先获取语言
         // 处理前端第一次语言展示
@@ -396,92 +405,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
-
-
-
-
-
-
-
-
-
-
-
-    // 删除提示语
-    document.querySelectorAll('.icon-btn.danger').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if (confirm('确定删除这条提示语吗？')) {
-                e.target.closest('.tip-card').remove();
-            }
-        });
-    });
-
-    // 编辑提示语
-    document.querySelectorAll('.icon-btn:not(.danger)').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const card = e.target.closest('.tip-card');
-            const texts = card.querySelectorAll('.tip-text');
-            const newPrimary = prompt('一级提示:', texts[0].textContent);
-            if (newPrimary !== null && newPrimary.trim()) {
-                texts[0].textContent = newPrimary.trim();
-            }
-            const newSecondary = prompt('二级提示:', texts[1].textContent);
-            if (newSecondary !== null && newSecondary.trim()) {
-                texts[1].textContent = newSecondary.trim();
-            }
-        });
-    });
-
-    // 添加新提示语
-    document.getElementById('addTipBtn').addEventListener('click', () => {
-        const primary = prompt('请输入一级提示:');
-        if (!primary || !primary.trim()) return;
-        const secondary = prompt('请输入二级提示:');
-        if (!secondary || !secondary.trim()) return;
-
-        const newCard = document.createElement('div');
-        newCard.className = 'tip-card';
-        newCard.innerHTML = `
-                <div class="tip-row">
-                    <span class="tip-label">一级提示</span>
-                    <span class="tip-text">${primary.trim()}</span>
-                    <div class="tip-actions">
-                        <button class="icon-btn" title="编辑">✎</button>
-                        <button class="icon-btn danger" title="删除">🗑</button>
-                    </div>
-                </div>
-                <div class="tip-row">
-                    <span class="tip-label">二级提示</span>
-                    <span class="tip-text">${secondary.trim()}</span>
-                </div>
-            `;
-        document.getElementById('tipsList').appendChild(newCard);
-
-        // 绑定事件
-        newCard.querySelector('.icon-btn.danger').addEventListener('click', (e) => {
-            if (confirm('确定删除这条提示语吗？')) {
-                e.target.closest('.tip-card').remove();
-            }
-        });
-        newCard.querySelector('.icon-btn:not(.danger)').addEventListener('click', (e) => {
-            const card = e.target.closest('.tip-card');
-            const texts = card.querySelectorAll('.tip-text');
-            const newP = prompt('一级提示:', texts[0].textContent);
-            if (newP !== null && newP.trim()) texts[0].textContent = newP.trim();
-            const newS = prompt('二级提示:', texts[1].textContent);
-            if (newS !== null && newS.trim()) texts[1].textContent = newS.trim();
-        });
-    });
-
-    // 重置默认提示语
-    document.getElementById('resetTipsBtn').addEventListener('click', () => {
-        if (confirm('确定重置为默认提示语吗？')) {
-            location.reload();
-        }
-    });
-
 });
-
 
 // 全局禁用所有元素的右键菜单
 window.addEventListener('contextmenu', (e) => {

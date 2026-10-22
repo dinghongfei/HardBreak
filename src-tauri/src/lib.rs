@@ -1,9 +1,9 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-use rand::RngExt;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
 use std::thread;
-use std::time::Duration; // ✅ 从 serde 导入
+use std::time::{Duration, Instant};
 
 use tauri::{
     menu::{Menu, MenuItem},
@@ -80,7 +80,6 @@ struct AppState {
     settings: Mutex<AppSettings>,
     running: Mutex<bool>,
     current_phase: Mutex<TimerPhase>, // 使用枚举，避免魔法值
-    remaining_seconds: Mutex<i32>,
     restart_requested: Mutex<bool>,   // 请求立即重启计时，让新时长马上生效
 }
 
@@ -90,7 +89,6 @@ impl Default for AppState {
             settings: Mutex::new(AppSettings::default()),
             running: Mutex::new(false),
             current_phase: Mutex::new(TimerPhase::Work), // 使用枚举
-            remaining_seconds: Mutex::new(0),
             restart_requested: Mutex::new(false),
         }
     }
@@ -220,8 +218,7 @@ fn start_timer_cycle(app: tauri::AppHandle) {
             // 获取当前阶段（使用枚举，类型安全）
             let phase = state.current_phase.lock().unwrap().clone();
 
-            // 根据阶段获取持续时间
-            // 根据阶段获取持续时间
+            // 根据阶段获取持续时间（时长只在阶段开始时读取）
             let duration_seconds = {
                 let settings = state.settings.lock().unwrap();
                 match phase {
@@ -230,16 +227,11 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                 }
             };
 
-            // 设置剩余时间
-            *state.remaining_seconds.lock().unwrap() = duration_seconds;
-
-            // println!("Starting {:?} phase: {} seconds", phase, duration_seconds);
-
-            // 执行当前阶段的倒计时
+            // 用墙钟推进倒计时：系统休眠/唤醒后按真实流逝时间计算，而不是循环次数
+            let phase_started = Instant::now();
             let mut notified = false;
-            let mut remaining = duration_seconds;
 
-            while remaining > 0 {
+            loop {
                 // 检查是否需要停止
                 if !*state.running.lock().unwrap() {
                     return;
@@ -250,31 +242,42 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                     break;
                 }
 
-                // ★ 新增：检查阶段是否被外部重置
+                // 检查阶段是否被外部重置（如跳过休息）
                 let new_phase = state.current_phase.lock().unwrap().clone();
                 if new_phase != phase {
                     // 阶段已被重置，跳出当前循环，外层 loop 会处理新阶段
                     break;
                 }
 
-                remaining -= 1;
-                *state.remaining_seconds.lock().unwrap() = remaining;
+                let elapsed = phase_started.elapsed().as_secs() as i32;
+                let remaining = duration_seconds - elapsed;
+                if remaining <= 0 {
+                    break;
+                }
 
-                // 发送更新事件到前端
+                // 发送更新事件到前端（一次锁取齐所有字段）
+                let (no_skip_mode, current_language, countdown_mode) = {
+                    let settings = state.settings.lock().unwrap();
+                    (
+                        settings.no_skip_mode,
+                        settings.language.clone(),
+                        settings.countdown_mode.clone(),
+                    )
+                };
                 let _ = app_clone.emit(
                     "app-state-update",
                     serde_json::json!({
                         "phase": phase.as_str(),  // 转换为字符串发送给前端
                         "duration": duration_seconds,
                         "remaining": remaining,
-                        "no_skip_mode": state.settings.lock().unwrap().no_skip_mode,
-                        "current_language": state.settings.lock().unwrap().language,
-                        "countdown_mode": state.settings.lock().unwrap().countdown_mode,
+                        "no_skip_mode": no_skip_mode,
+                        "current_language": current_language,
+                        "countdown_mode": countdown_mode,
                     }),
                 );
 
-                // 工作阶段：检查是否需要发送通知（剩余10秒）
-                if matches!(phase, TimerPhase::Work) && !notified && remaining == 10 {
+                // 工作阶段：剩余 10 秒及以内发一次提醒（休眠唤醒可能跳过恰好 10 秒的点）
+                if matches!(phase, TimerPhase::Work) && !notified && remaining <= 10 {
                     let notify_before_break = state.settings.lock().unwrap().notify_before_break;
                     if notify_before_break {
                         notified = true;
@@ -283,9 +286,12 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                     }
                 }
 
-                // println!("{:?} phase: {} seconds remaining", phase, remaining);
-
-                thread::sleep(Duration::from_secs(1));
+                // 睡到相对阶段起点的下一个整秒 tick，单轮开销不会累积成漂移
+                let next_tick = Duration::from_secs((elapsed + 1) as u64);
+                let now = phase_started.elapsed();
+                if next_tick > now {
+                    thread::sleep(next_tick - now);
+                }
             }
 
             // 检查是否请求了立即重启（让新时长马上生效）
@@ -328,29 +334,6 @@ fn start_timer_cycle(app: tauri::AppHandle) {
         }
     });
 }
-
-// // 停止定时器循环
-// #[tauri::command]
-// fn stop_timer_cycle(app: tauri::AppHandle) {
-//     let state = app.state::<AppState>();
-//     *state.running.lock().unwrap() = false;
-// }
-
-// // 获取当前状态
-// #[tauri::command]
-// fn get_timer_status(app: tauri::AppHandle) -> serde_json::Value {
-//     let state = app.state::<AppState>();
-
-//     let phase = state.current_phase.lock().unwrap().clone();
-
-//     serde_json::json!({
-//         "running": *state.running.lock().unwrap(),
-//         "phase": phase.as_str(),
-//         "remaining": *state.remaining_seconds.lock().unwrap()
-//     })
-// }
-
-
 
 #[tauri::command]
 fn hide_break_window(app: tauri::AppHandle) {
