@@ -2,7 +2,7 @@
 
 HardBreak 是一款在你的电脑上运行的番茄钟。工作一段时间后，它会在每块显示器上显示休息窗口。本政策说明这款桌面应用处理哪些信息。
 
-最后更新：2026-09-22
+最后更新：2026-10-22
 
 ## 我们不收集的内容
 
@@ -23,6 +23,7 @@ HardBreak 没有账号，也不连接开发者的服务器。应用不会：
 | 工作时长、休息时长 | 决定下一阶段的倒计时 |
 | 休息前是否通知、是否允许跳过 | 控制休息前通知和跳过按钮 |
 | 界面语言 | 显示对应语言的文案 |
+| 倒计时样式（圆环或翻页时钟） | 决定休息窗使用哪种倒计时界面 |
 | 是否已完成首次启动 | 只在第一次启动时按系统语言选择界面语言 |
 
 首次启动时，应用会读取操作系统的语言设置，用来选择简体中文、繁体中文或英文，然后把选择结果保存在上面的数据库里。这个读取只发生在本机。
@@ -51,7 +52,7 @@ HardBreak 没有账号，也不连接开发者的服务器。应用不会：
 
 HardBreak is a Pomodoro timer that runs on your computer and shows a break window on each display. This policy describes what the desktop app does with information.
 
-Last updated: 2026-09-22
+Last updated: 2026-10-22
 
 ### What we do not collect
 
@@ -72,6 +73,7 @@ The app writes the settings below to a local SQLite database, `config.db`, in th
 | Work duration and break duration | Length of the next timer phase |
 | Notify-before-break and no-skip switches | Whether to show the pre-break notification and the skip button |
 | Interface language | Which language to display |
+| Countdown style (ring or flip clock) | Which countdown style the break window shows |
 | First-run flag | On the first launch only, pick the interface language from the system language |
 
 On first launch, the app reads the operating system language to choose Simplified Chinese, Traditional Chinese, or English, then saves that choice in the database above. The read stays on the device.
