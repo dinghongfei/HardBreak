@@ -927,8 +927,19 @@ fn create_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), tauri::Error> {
 
     let menu = Menu::with_items(app, &[&config_setting_i, &quit_i])?;
 
-    let _tray = TrayIconBuilder::with_id("tray_icon")
-        .icon(app.default_window_icon().unwrap().clone())
+    // macOS 菜单栏惯例是单色模板图标，系统自动按菜单栏明暗反色；
+    // Windows/Linux 托盘彩色图标是常态，继续用应用图标
+    #[cfg(target_os = "macos")]
+    let tray_icon = tauri::image::Image::new(
+        include_bytes!("../icons/tray-macos.rgba"), // 44x44 原始 RGBA，由脚本从 app-icon.png 生成
+        44,
+        44,
+    );
+    #[cfg(not(target_os = "macos"))]
+    let tray_icon = app.default_window_icon().unwrap().clone();
+
+    let builder = TrayIconBuilder::with_id("tray_icon")
+        .icon(tray_icon)
         .menu(&menu)
         .tooltip("HardBreak")
         .on_menu_event(move |app, event| match event.id.as_ref() {
@@ -940,8 +951,12 @@ fn create_tray<R: Runtime>(app: &tauri::App<R>) -> Result<(), tauri::Error> {
             }
             _ => {}
         })
-        .on_tray_icon_event(|_tray, _event| {})
-        .build(app)?;
+        .on_tray_icon_event(|_tray, _event| {});
+
+    #[cfg(target_os = "macos")]
+    let builder = builder.icon_as_template(true);
+
+    let _tray = builder.build(app)?;
 
     Ok(())
 }
