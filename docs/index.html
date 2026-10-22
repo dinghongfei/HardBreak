@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HardBreak — 番茄工作法 + 强制休息提醒</title>
     <meta name="description" content="番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。">
+    <meta property="og:title" content="HardBreak — 番茄工作法 + 强制休息提醒">
+    <meta property="og:description" content="番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。">
+    <meta property="og:type" content="website">
     <link rel="icon" href="images/icon.ico" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -204,11 +207,35 @@
             margin-top: 64px; max-width: 780px; width: 100%;
             animation: fadeUp 0.8s ease 0.4s both;
         }
-        .hero-img img {
-            width: 100%; border-radius: var(--r-lg);
+        /* Hero 轮播：三图叠放淡入淡出，容器统一 16/10 */
+        .hero-carousel {
+            position: relative; width: 100%;
+            aspect-ratio: 16 / 10;
+            border-radius: var(--r-lg);
             border: 1px solid var(--border-h);
+            overflow: hidden;
             box-shadow: 0 0 60px rgba(34,197,94,0.06), 0 24px 64px rgba(0,0,0,0.5);
         }
+        .hc-img {
+            position: absolute; inset: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; object-position: center;
+            opacity: 0;
+            transition: opacity 0.8s var(--ease);
+        }
+        .hc-img.hc-active { opacity: 1; }
+        .hc-dots {
+            position: absolute; bottom: 14px; left: 50%;
+            transform: translateX(-50%);
+            display: flex; gap: 8px; z-index: 2;
+        }
+        .hc-dot {
+            width: 6px; height: 6px; padding: 0; border: none;
+            border-radius: 999px; background: rgba(255,255,255,0.3);
+            cursor: pointer; transition: all var(--t);
+        }
+        .hc-dot:hover { background: rgba(255,255,255,0.6); }
+        .hc-dot.hc-dot-active { width: 18px; background: rgba(255,255,255,0.85); }
 
         /* ========== Trust Bar ========== */
         .trust {
@@ -296,6 +323,8 @@
         .hl-text .section-label { margin-bottom: 12px; }
         .hl-text .section-title { margin-bottom: 16px; }
         .hl-text .section-desc { max-width: 420px; }
+        /* 图左文右的交错布局 */
+        .highlight--rev { flex-direction: row-reverse; }
         .hl-img { flex: 1; }
         .hl-img img {
             width: 100%; border-radius: var(--r-lg);
@@ -307,6 +336,7 @@
         .ss-grid {
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
         }
+        .ss-grid--3 { grid-template-columns: repeat(3, 1fr); }
         .ss-card {
             border-radius: var(--r); overflow: hidden;
             border: 1px solid var(--border); background: var(--bg-card);
@@ -317,7 +347,13 @@
             box-shadow: 0 16px 48px rgba(0,0,0,0.35);
             border-color: var(--border-h);
         }
-        .ss-card img { width: 100%; }
+        .ss-card img {
+            width: 100%;
+            /* 截图原始宽高比不同，统一裁切比例保证网格等高 */
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+            object-position: center;
+        }
         .ss-cap {
             padding: 14px 20px; font-size: 0.85rem;
             color: var(--text-3); text-align: center;
@@ -443,13 +479,13 @@
                 <span data-i18n="hero.badge">Windows 与 macOS 桌面应用</span>
             </div>
             <h1 class="hero-title">HardBreak</h1>
-            <p class="hero-sub" data-i18n="hero.subtitle">番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。</p>
+            <p class="hero-sub" data-i18n="hero.subtitle">工作一段时间，就认真休息一下。在每块显示器上弹出全屏休息窗，保护你的颈椎与视力。</p>
             <div class="hero-actions">
                 <a href="https://apps.microsoft.com/detail/9N3DPNG7LML0" target="_blank" class="btn btn--fill" data-i18n="hero.cta.win">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
                     Windows 下载
                 </a>
-                <a href="https://github.com/dinghongfei/HardBreak/releases" target="_blank" class="btn btn--fill" data-i18n="hero.cta.mac">
+                <a href="https://github.com/dinghongfei/HardBreak" target="_blank" class="btn btn--fill" data-i18n="hero.cta.mac">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
                     macOS 下载
                 </a>
@@ -457,7 +493,16 @@
             </div>
         </div>
         <div class="hero-img">
-            <img id="imgHero" src="images/中文-休息-可跳过.png" alt="HardBreak Break Screen">
+            <div class="hero-carousel" id="heroCarousel">
+                <img id="imgHeroA" class="hc-img hc-active" src="images/中文-休息-可跳过.png" alt="HardBreak Break Screen">
+                <img id="imgHeroB" class="hc-img" src="images/中文-休息-不可跳过.png" alt="HardBreak Break Screen - no skip" loading="lazy">
+                <img id="imgHeroC" class="hc-img" src="images/中文-休息页面-flipclock效果.png" alt="HardBreak Break Screen - flip clock" loading="lazy">
+                <div class="hc-dots">
+                    <button class="hc-dot hc-dot-active" aria-label="截图 1"></button>
+                    <button class="hc-dot" aria-label="截图 2"></button>
+                    <button class="hc-dot" aria-label="截图 3"></button>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -500,12 +545,22 @@
             <div class="feat-card reveal reveal-d2">
                 <div class="feat-ico">💡</div>
                 <h3 class="feat-name" data-i18n="feat.f3t">动态休息提示</h3>
-                <p class="feat-text" data-i18n="feat.f3d">每次休息随机展示不同健康建议——喝水、深呼吸、远眺窗外，让休息不再枯燥。</p>
+                <p class="feat-text" data-i18n="feat.f3d">每次休息随机一条健康提示——喝水、深呼吸、远眺窗外，让休息不再枯燥。</p>
             </div>
             <div class="feat-card reveal reveal-d3">
                 <div class="feat-ico">🔒</div>
                 <h3 class="feat-name" data-i18n="feat.f4t">不可跳过模式</h3>
-                <p class="feat-text" data-i18n="feat.f4d">开启后休息时无法点击"跳过"，强制养成健康习惯。对自己狠一点，告别拖延。</p>
+                <p class="feat-text" data-i18n="feat.f4d">开启后休息时无法点击「跳过」，强制养成健康习惯。对自己狠一点，告别拖延。</p>
+            </div>
+            <div class="feat-card reveal">
+                <div class="feat-ico">🕰️</div>
+                <h3 class="feat-name" data-i18n="feat.f5t">两种倒计时样式</h3>
+                <p class="feat-text" data-i18n="feat.f5d">圆环或翻页时钟，随手切换，立即生效。翻页时钟的每一次翻动，都提醒你时间在流逝。</p>
+            </div>
+            <div class="feat-card reveal reveal-d1">
+                <div class="feat-ico">🔁</div>
+                <h3 class="feat-name" data-i18n="feat.f6t">立即生效</h3>
+                <p class="feat-text" data-i18n="feat.f6d">调整工作/休息时长后，一键从工作阶段重新计时，不必等下一阶段，等同重启应用。</p>
             </div>
         </div>
     </section>
@@ -517,16 +572,20 @@
         <div class="section-header sh-center reveal">
             <p class="section-label" data-i18n="ss.label">界面预览</p>
             <h2 class="section-title" data-i18n="ss.title">简洁优雅的休息界面</h2>
-            <p class="section-desc" data-i18n="ss.desc">全屏沉浸式休息窗口，动态健康提示搭配倒计时，每次休息都是一次小小的放松。</p>
+            <p class="section-desc" data-i18n="ss.desc">全屏沉浸式休息窗口，圆环或翻页时钟倒计时搭配健康提示，每次休息都是一次小小的放松。</p>
         </div>
-        <div class="ss-grid">
+        <div class="ss-grid ss-grid--3">
             <div class="ss-card reveal">
-                <img id="imgSkip" src="images/中文-休息-可跳过.png" alt="Break - skippable">
+                <img id="imgSkip" src="images/中文-休息-可跳过.png" alt="Break - skippable" loading="lazy">
                 <div class="ss-cap" data-i18n="ss.cap1">休息界面 — 可跳过</div>
             </div>
             <div class="ss-card reveal reveal-d1">
-                <img id="imgNoSkip" src="images/中文-休息-不可跳过.png" alt="Break - no skip">
+                <img id="imgNoSkip" src="images/中文-休息-不可跳过.png" alt="Break - no skip" loading="lazy">
                 <div class="ss-cap" data-i18n="ss.cap2">休息界面 — 不可跳过模式</div>
+            </div>
+            <div class="ss-card reveal reveal-d2">
+                <img id="imgFlip" src="images/中文-休息页面-flipclock效果.png" alt="Break - flip clock" loading="lazy">
+                <div class="ss-cap" data-i18n="ss.cap3">休息界面 — 翻页时钟</div>
             </div>
         </div>
     </section>
@@ -538,10 +597,24 @@
         <div class="hl-text reveal">
             <p class="section-label" data-i18n="cfg.label">灵活配置</p>
             <h2 class="section-title" data-i18n="cfg.title">一切尽在你的掌控</h2>
-            <p class="section-desc" data-i18n="cfg.desc">自定义工作时长、休息时长、提醒方式等参数，打造最适合你的工作节奏。</p>
+            <p class="section-desc" data-i18n="cfg.desc">自定义工作/休息时长、倒计时样式、提醒方式等参数，改完时点「立即生效」马上重新计时，打造最适合你的工作节奏。</p>
         </div>
         <div class="hl-img reveal reveal-d1">
-            <img id="imgConfig" src="images/中文-配置.png" alt="HardBreak Configuration">
+            <img id="imgConfig" src="images/中文-配置.png" alt="HardBreak Configuration" loading="lazy">
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== Highlight: Countdown Style ===== -->
+    <section class="highlight highlight--rev" id="breakcfg">
+        <div class="hl-text reveal">
+            <p class="section-label" data-i18n="bw.label">休息窗样式</p>
+            <h2 class="section-title" data-i18n="bw.title">圆环，或者翻页时钟</h2>
+            <p class="section-desc" data-i18n="bw.desc">休息窗的倒计时可以选圆环或翻页时钟。翻页时钟每秒翻动，质感拉满；即选即生效，下一次休息就用上。</p>
+        </div>
+        <div class="hl-img reveal reveal-d1">
+            <img id="imgBreakCfg" src="images/中文-配置-倒计时配置.png" alt="Countdown style settings" loading="lazy">
         </div>
     </section>
 
@@ -555,7 +628,7 @@
             <p class="section-desc" data-i18n="hl.desc">工作结束前弹出系统通知，给你充足的时间保存进度、完成手头的工作，从容进入休息。</p>
         </div>
         <div class="hl-img reveal reveal-d1">
-            <img id="imgNotify" src="images/中文-休息提醒.png" alt="Pre-break notification">
+            <img id="imgNotify" src="images/中文-休息提醒.png" alt="Pre-break notification" loading="lazy">
         </div>
     </section>
 
@@ -571,7 +644,7 @@
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
                     Windows 下载
                 </a>
-                <a href="https://github.com/dinghongfei/HardBreak/releases" target="_blank" class="btn btn--fill" data-i18n="cta.btn.mac">
+                <a href="https://github.com/dinghongfei/HardBreak" target="_blank" class="btn btn--fill" data-i18n="cta.btn.mac">
                     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0l-3-3m3 3l3-3"/><path d="M2 13h12"/></svg>
                     macOS 下载
                 </a>
@@ -586,7 +659,7 @@
             <ul class="footer-links">
                 <li><a href="https://github.com/dinghongfei/HardBreak" target="_blank" rel="noopener noreferrer">GitHub</a></li>
                 <li><a href="https://raw.githubusercontent.com/dinghongfei/HardBreak/refs/heads/main/PRIVACY.md" target="_blank" rel="noopener noreferrer" data-i18n="footer.privacy">隐私政策</a></li>
-                <li><a href="#" data-i18n="footer.contact">联系我们</a></li>
+                <li><a href="https://github.com/dinghongfei/HardBreak/issues" target="_blank" rel="noopener noreferrer" data-i18n="footer.contact">提交反馈</a></li>
             </ul>
         </div>
     </footer>
@@ -599,84 +672,97 @@
         'zh-CN': {
             'nav.features': '功能', 'nav.screenshots': '截图', 'nav.download': '下载',
             'hero.badge': 'Windows 与 macOS 桌面应用',
-            'hero.subtitle': '番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。',
+            'hero.subtitle': '工作一段时间，就认真休息一下。在每块显示器上弹出全屏休息窗，保护你的颈椎与视力。',
             'hero.cta.win': 'Windows 下载', 'hero.cta.mac': 'macOS 下载', 'hero.cta2': '了解更多',
             'trust.t1': '隐私优先，不收集数据', 'trust.t2': '极低资源占用', 'trust.t3': '干净无广告',
             'feat.label': '核心功能', 'feat.title': '专注工作，科学休息',
             'feat.desc': '每一个功能都经过精心设计，帮助你在效率与健康之间找到完美平衡。',
             'feat.f1t': '番茄计时', 'feat.f1d': '默认工作 25 分钟 / 休息 5 分钟，时长可自定义。自动循环，让你的工作节奏井然有序。',
             'feat.f2t': '多屏幕支持', 'feat.f2d': '休息时所有显示器均弹出休息提示窗口。无论你在哪块屏幕上操作，都不会错过提醒。',
-            'feat.f3t': '动态休息提示', 'feat.f3d': '每次休息随机展示不同健康建议——喝水、深呼吸、远眺窗外，让休息不再枯燥。',
-            'feat.f4t': '不可跳过模式', 'feat.f4d': '开启后休息时无法点击"跳过"，强制养成健康习惯。对自己狠一点，告别拖延。',
+            'feat.f3t': '动态休息提示', 'feat.f3d': '每次休息随机一条健康提示——喝水、深呼吸、远眺窗外，让休息不再枯燥。',
+            'feat.f4t': '不可跳过模式', 'feat.f4d': '开启后休息时无法点击「跳过」，强制养成健康习惯。对自己狠一点，告别拖延。',
+            'feat.f5t': '两种倒计时样式', 'feat.f5d': '圆环或翻页时钟，随手切换，立即生效。翻页时钟的每一次翻动，都提醒你时间在流逝。',
+            'feat.f6t': '立即生效', 'feat.f6d': '调整工作/休息时长后，一键从工作阶段重新计时，不必等下一阶段，等同重启应用。',
             'hl.label': '贴心提醒', 'hl.title': '休息前 10 秒，提前预告',
             'hl.desc': '工作结束前弹出系统通知，给你充足的时间保存进度、完成手头的工作，从容进入休息。',
             'ss.label': '界面预览', 'ss.title': '简洁优雅的休息界面',
-            'ss.desc': '全屏沉浸式休息窗口，动态健康提示搭配倒计时，每次休息都是一次小小的放松。',
-            'ss.cap1': '休息界面 — 可跳过', 'ss.cap2': '休息界面 — 不可跳过模式',
+            'ss.desc': '全屏沉浸式休息窗口，圆环或翻页时钟倒计时搭配健康提示，每次休息都是一次小小的放松。',
+            'ss.cap1': '休息界面 — 可跳过', 'ss.cap2': '休息界面 — 不可跳过模式', 'ss.cap3': '休息界面 — 翻页时钟',
             'cfg.label': '灵活配置', 'cfg.title': '一切尽在你的掌控',
-            'cfg.desc': '自定义工作时长、休息时长、提醒方式等参数，打造最适合你的工作节奏。',
+            'cfg.desc': '自定义工作/休息时长、倒计时样式、提醒方式等参数，改完时点「立即生效」马上重新计时，打造最适合你的工作节奏。',
+            'bw.label': '休息窗样式', 'bw.title': '圆环，或者翻页时钟',
+            'bw.desc': '休息窗的倒计时可以选圆环或翻页时钟。翻页时钟每秒翻动，质感拉满；即选即生效，下一次休息就用上。',
             'cta.title': '是时候善待自己了', 'cta.desc': '免费下载 HardBreak，支持 Windows 与 macOS，从今天开始科学休息。', 'cta.btn.win': 'Windows 下载', 'cta.btn.mac': 'macOS 下载',
             'footer.copy': '\u00a9 2026 HardBreak. 保护你的健康。',
-            'footer.privacy': '隐私政策', 'footer.contact': '联系我们',
+            'footer.privacy': '隐私政策', 'footer.contact': '提交反馈',
             '_meta.title': 'HardBreak — 番茄工作法 + 强制休息提醒',
-            '_meta.desc': '番茄工作法 + 强制休息提醒，支持多屏幕显示动态健康提示，保护你的颈椎与视力。'
+            '_meta.desc': '工作一段时间，就认真休息一下。在每块显示器上弹出全屏休息窗，保护你的颈椎与视力。'
         },
         'zh-TW': {
             'nav.features': '功能', 'nav.screenshots': '截圖', 'nav.download': '下載',
             'hero.badge': 'Windows 與 macOS 桌面應用',
-            'hero.subtitle': '番茄工作法 + 強制休息提醒，支援多螢幕顯示動態健康提示，保護頸椎與視力。',
+            'hero.subtitle': '工作一段時間，就認真休息一下。在每塊顯示器上彈出全螢幕休息視窗，保護你的頸椎與視力。',
             'hero.cta.win': 'Windows 下載', 'hero.cta.mac': 'macOS 下載', 'hero.cta2': '瞭解更多',
             'trust.t1': '隱私優先，不收集資料', 'trust.t2': '極低資源佔用', 'trust.t3': '乾淨無廣告',
             'feat.label': '核心功能', 'feat.title': '專注工作，科學休息',
             'feat.desc': '每一個功能都經過精心設計，幫助你在效率與健康之間找到完美平衡。',
             'feat.f1t': '番茄計時', 'feat.f1d': '預設工作 25 分鐘 / 休息 5 分鐘，時長可自訂。自動循環，讓你的工作節奏井然有序。',
             'feat.f2t': '多螢幕支援', 'feat.f2d': '休息時所有顯示器均彈出休息提示視窗。無論你在哪塊螢幕上操作，都不會錯過提醒。',
-            'feat.f3t': '動態休息提示', 'feat.f3d': '每次休息隨機展示不同健康建議——喝水、深呼吸、遠眺窗外，讓休息不再枯燥。',
+            'feat.f3t': '動態休息提示', 'feat.f3d': '每次休息隨機一條健康提示——喝水、深呼吸、遠眺窗外，讓休息不再枯燥。',
             'feat.f4t': '不可跳過模式', 'feat.f4d': '開啟後休息時無法點擊「跳過」，強制養成健康習慣。對自己嚴格一點，告別拖延。',
+            'feat.f5t': '兩種倒數計時樣式', 'feat.f5d': '圓環或翻頁時鐘，隨手切換，立即生效。翻頁時鐘的每一次翻動，都提醒你時間在流逝。',
+            'feat.f6t': '立即生效', 'feat.f6d': '調整工作/休息時長後，一鍵從工作階段重新計時，不必等下一階段，等同重新啟動應用。',
             'hl.label': '貼心提醒', 'hl.title': '休息前 10 秒，提前預告',
             'hl.desc': '工作結束前彈出系統通知，給你充足的時間儲存進度、完成手頭的工作，從容進入休息。',
             'ss.label': '介面預覽', 'ss.title': '簡潔優雅的休息介面',
-            'ss.desc': '全螢幕沉浸式休息視窗，動態健康提示搭配倒數計時，每次休息都是一次小小的放鬆。',
-            'ss.cap1': '休息介面 — 可跳過', 'ss.cap2': '休息介面 — 不可跳過模式',
+            'ss.desc': '全螢幕沉浸式休息視窗，圓環或翻頁時鐘倒數計時搭配健康提示，每次休息都是一次小小的放鬆。',
+            'ss.cap1': '休息介面 — 可跳過', 'ss.cap2': '休息介面 — 不可跳過模式', 'ss.cap3': '休息介面 — 翻頁時鐘',
             'cfg.label': '靈活配置', 'cfg.title': '一切盡在你的掌控',
-            'cfg.desc': '自訂工作時長、休息時長、提醒方式等參數，打造最適合你的工作節奏。',
+            'cfg.desc': '自訂工作/休息時長、倒數計時樣式、提醒方式等參數，改完時點「立即生效」馬上重新計時，打造最適合你的工作節奏。',
+            'bw.label': '休息視窗樣式', 'bw.title': '圓環，或者翻頁時鐘',
+            'bw.desc': '休息視窗的倒數計時可以選圓環或翻頁時鐘。翻頁時鐘每秒翻動，質感拉滿；即選即生效，下一次休息就用上。',
             'cta.title': '是時候善待自己了', 'cta.desc': '免費下載 HardBreak，支援 Windows 與 macOS，從今天開始科學休息。', 'cta.btn.win': 'Windows 下載', 'cta.btn.mac': 'macOS 下載',
             'footer.copy': '\u00a9 2026 HardBreak. 守護你的健康。',
-            'footer.privacy': '隱私政策', 'footer.contact': '聯繫我們',
+            'footer.privacy': '隱私政策', 'footer.contact': '提交意見',
             '_meta.title': 'HardBreak — 番茄工作法 + 強制休息提醒',
-            '_meta.desc': '番茄工作法 + 強制休息提醒，支援多螢幕顯示動態健康提示，保護頸椎與視力。'
+            '_meta.desc': '工作一段時間，就認真休息一下。在每塊顯示器上彈出全螢幕休息視窗，保護你的頸椎與視力。'
         },
         'en': {
             'nav.features': 'Features', 'nav.screenshots': 'Preview', 'nav.download': 'Download',
             'hero.badge': 'Windows & macOS',
-            'hero.subtitle': 'Pomodoro timer + enforced break reminders with multi-screen support & dynamic health tips to protect your eyes and posture.',
+            'hero.subtitle': 'Work for a while, then truly rest. HardBreak puts a fullscreen break window on every display to protect your eyes and posture.',
             'hero.cta.win': 'Download for Windows', 'hero.cta.mac': 'Download for macOS', 'hero.cta2': 'Learn More',
             'trust.t1': 'Privacy first, no data collected', 'trust.t2': 'Minimal resource usage', 'trust.t3': 'Clean, ad-free',
             'feat.label': 'CORE FEATURES', 'feat.title': 'Stay focused. Rest smart.',
             'feat.desc': 'Every feature is carefully designed to help you find the perfect balance between productivity and health.',
             'feat.f1t': 'Pomodoro Timer', 'feat.f1d': 'Default 25 min work / 5 min break, fully customizable. Automatic cycling keeps your work rhythm organized.',
             'feat.f2t': 'Multi-Screen Support', 'feat.f2d': "Break windows appear on all connected displays. No matter which screen you're working on, you'll never miss a reminder.",
-            'feat.f3t': 'Dynamic Break Tips', 'feat.f3d': 'Random health suggestions each break \u2014 drink water, deep breaths, look away. Keeps breaks fresh and educational.',
-            'feat.f4t': 'No-Skip Mode', 'feat.f4d': 'When enabled, the skip button is disabled during breaks. Be strict with yourself \u2014 no more "just five more minutes".',
+            'feat.f3t': 'Dynamic Break Tips', 'feat.f3d': 'One random health tip each break \u2014 drink water, breathe deeply, look into the distance. Breaks never get boring.',
+            'feat.f4t': 'No-Skip Mode', 'feat.f4d': 'When enabled, the skip button is hidden during breaks. Be a little hard on yourself \u2014 no more "just five more minutes".',
+            'feat.f5t': 'Two Countdown Styles', 'feat.f5d': 'Ring or flip clock — switch anytime, effective instantly. Every flip of the clock reminds you that time is passing.',
+            'feat.f6t': 'Apply Now', 'feat.f6d': 'Changed the work or break duration? Restart the timer from the work phase with one click — no waiting for the next phase.',
             'hl.label': 'THOUGHTFUL DESIGN', 'hl.title': '10-second heads-up before break',
             'hl.desc': 'A system notification appears before each break, giving you time to save your progress and wrap up.',
             'ss.label': 'PREVIEW', 'ss.title': 'Clean, elegant break screen',
-            'ss.desc': 'Full-screen immersive break windows with dynamic health tips and countdown. Every break is a moment of relaxation.',
+            'ss.desc': 'Immersive fullscreen break windows with a ring or flip-clock countdown and health tips. Every break is a small moment of relaxation.',
             'ss.cap1': 'Break Screen \u2014 Skippable', 'ss.cap2': 'Break Screen \u2014 No-Skip Mode',
+            'ss.cap3': 'Break Screen — Flip Clock',
             'cfg.label': 'FLEXIBLE SETTINGS', 'cfg.title': 'Everything under your control',
-            'cfg.desc': 'Customize work duration, break length, notification style and more. Build the perfect rhythm for your workflow.',
+            'cfg.desc': 'Tune work and break durations, countdown style, notifications and more — hit Apply Now to restart timing right away. Build the rhythm that fits you best.',
+            'bw.label': 'BREAK WINDOW STYLE', 'bw.title': 'Ring, or flip clock',
+            'bw.desc': 'Pick a ring or a flip clock for the break countdown — the flip clock ticks every second with a satisfying flip. Switch anytime; it applies instantly, and your next break uses it.',
             'cta.title': 'Time to take care of yourself', 'cta.desc': 'Download HardBreak for free on Windows and macOS, and start resting the smart way.', 'cta.btn.win': 'Download for Windows', 'cta.btn.mac': 'Download for macOS',
             'footer.copy': '\u00a9 2026 HardBreak. Protecting your health.',
-            'footer.privacy': 'Privacy Policy', 'footer.contact': 'Contact Us',
+            'footer.privacy': 'Privacy Policy', 'footer.contact': 'Feedback',
             '_meta.title': 'HardBreak \u2014 Pomodoro Timer + Enforced Break Reminders',
-            '_meta.desc': 'Pomodoro timer + enforced break reminders with multi-screen support & dynamic health tips.'
+            '_meta.desc': 'Work for a while, then truly rest. HardBreak puts a fullscreen break window on every display to protect your eyes and posture.'
         }
     };
 
     const IMG = {
-        'zh-CN': { config: 'images/中文-配置.png', notify: 'images/中文-休息提醒.png', skip: 'images/中文-休息-可跳过.png', noskip: 'images/中文-休息-不可跳过.png' },
-        'zh-TW': { config: 'images/繁体-配置.png', notify: 'images/繁体-休息提醒.png', skip: 'images/繁体-休息-可跳过.png', noskip: 'images/繁体-休息-不可跳过.png' },
-        'en':    { config: 'images/英语-配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/英语-休息-可跳过.png', noskip: 'images/英语-休息-不可跳过.png' }
+        'zh-CN': { config: 'images/中文-配置.png', breakcfg: 'images/中文-配置-倒计时配置.png', notify: 'images/中文-休息提醒.png', skip: 'images/中文-休息-可跳过.png', noskip: 'images/中文-休息-不可跳过.png', flip: 'images/中文-休息页面-flipclock效果.png' },
+        'zh-TW': { config: 'images/繁体-配置.png', breakcfg: 'images/繁体-配置-倒计时配置.png', notify: 'images/繁体-休息提醒.png', skip: 'images/繁体-休息-可跳过.png', noskip: 'images/繁体-休息-不可跳过.png', flip: 'images/繁体-休息页面-flipclock效果.png' },
+        'en':    { config: 'images/英语-配置.png', breakcfg: 'images/英语-配置-倒计时配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/英语-休息-可跳过.png', noskip: 'images/英语-休息-不可跳过.png', flip: 'images/英语-休息页面-flipclock效果.png' }
     };
 
     const LANG_NAMES = { 'zh-CN': '简体中文', 'zh-TW': '繁體中文', 'en': 'English' };
@@ -704,10 +790,14 @@
         });
 
         // Update images
-        document.getElementById('imgHero').src = img.skip;
+        document.getElementById('imgHeroA').src = img.skip;
+        document.getElementById('imgHeroB').src = img.noskip;
+        document.getElementById('imgHeroC').src = img.flip;
         document.getElementById('imgSkip').src = img.skip;
         document.getElementById('imgNoSkip').src = img.noskip;
+        document.getElementById('imgFlip').src = img.flip;
         document.getElementById('imgConfig').src = img.config;
+        document.getElementById('imgBreakCfg').src = img.breakcfg;
         document.getElementById('imgNotify').src = img.notify;
 
         // Update meta
@@ -736,6 +826,30 @@
     document.addEventListener('click', () =>
         document.getElementById('langDd').classList.remove('open')
     );
+
+    /* ==========================================
+       Hero Carousel：每 4 秒淡切，悬停暂停，圆点可点
+       ========================================== */
+    const hcImgs = ['imgHeroA', 'imgHeroB', 'imgHeroC'].map(id => document.getElementById(id));
+    const hcDots = Array.from(document.querySelectorAll('.hc-dot'));
+    let hcIndex = 0, hcTimer = null;
+
+    function hcShow(i) {
+        hcIndex = i;
+        hcImgs.forEach((el, k) => el.classList.toggle('hc-active', k === i));
+        hcDots.forEach((d, k) => d.classList.toggle('hc-dot-active', k === i));
+    }
+    function hcStop() { if (hcTimer) { clearInterval(hcTimer); hcTimer = null; } }
+    function hcStart() {
+        hcStop();
+        hcTimer = setInterval(() => hcShow((hcIndex + 1) % hcImgs.length), 4000);
+    }
+
+    hcDots.forEach((d, k) => d.addEventListener('click', () => { hcShow(k); hcStart(); }));
+    const heroCarouselEl = document.getElementById('heroCarousel');
+    heroCarouselEl.addEventListener('mouseenter', hcStop);
+    heroCarouselEl.addEventListener('mouseleave', hcStart);
+    hcStart();
 
     /* ==========================================
        Scroll Reveal
