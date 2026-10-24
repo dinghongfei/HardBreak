@@ -2,102 +2,23 @@ const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 const { locale } = window.__TAURI__.os;
 
+// ==================== 多语言（文案集中在 locales.js，加语言只需改该文件） ====================
+const LOCALES = window.HB_LOCALES;
+const FALLBACK_LOCALE = LOCALES[window.HB_FALLBACK_LANG] || LOCALES.en;
 
-const i18nMessages = {
-    'zh-CN': {
-        'config.tab.general': "常规",
-        'config.tab.about': "关于",
-        'config.tab.general.status.title': "运行中",
-        'config.tab.general.status.subtitle.work': '当前正在工作',
-        'config.tab.general.status.subtitle.break': '当前正在休息',
-        'config.tab.general.status.label.work': '距离下一次工作倒计时',
-        'config.tab.general.status.label.break': '距离下一次休息倒计时',
-        'config.tab.general.work.label': '工作时长',
-        'config.tab.general.work.unit': '分钟',
-        'config.tab.general.break.label': '休息时长',
-        'config.tab.general.break.unit': '分钟',
-        'config.tab.general.notify.label': '进入休息前提醒',
-        'config.tab.general.notify.tip': '开启后，休息前10秒弹窗提醒',
-        'config.tab.general.noSkip.label': '不可跳过模式',
-        'config.tab.general.noSkip.tip': '开启后，休息不可跳过',
-        'config.tab.general.noSkip.confirm.title': '谨慎开启不可跳过模式',
-        'config.tab.general.noSkip.confirm.desc': '开启后，每次休息都无法跳过：休息窗会覆盖所有屏幕，直到倒计时结束才能继续使用电脑，紧急事务也只能等待。请确认你的工作节奏允许定时强制休息，再谨慎开启。',
-        'config.tab.general.noSkip.confirm.ok': '我已了解，开启',
-        'config.tab.general.noSkip.confirm.cancel': '再想想',
-        'config.tab.general.language.label': '语言',
-        'config.tab.general.applyNow.btn': '立即生效',
-        'config.tab.general.applyNow.tip': '工作/休息时长默认从下一阶段开始生效。点击后立即按新时长从工作阶段重新计时，效果等同重启应用。',
-        'config.tab.breakWindow': '休息窗',
-        'config.tab.breakWindow.mode.ring': '圆环',
-        'config.tab.breakWindow.mode.flipclock': '翻页时钟',
-        'config.tab.breakWindow.tip': '选择休息窗的倒计时样式，切换后立即生效。',
-        'config.tab.about.version.label': '版本',
-        'config.tab.about.description.label': '描述',
-        'config.tab.about.description.text': '一款帮助你养成良好工作休息习惯的应用，定时提醒你休息，保护你的健康。',
-    },
-    'zh-TW': {
-        'config.tab.general': "一般",
-        'config.tab.about': "關於",
-        'config.tab.general.status.title': "運行中",
-        'config.tab.general.status.subtitle.work': '當前正在工作',
-        'config.tab.general.status.subtitle.break': '當前正在休息',
-        'config.tab.general.status.label.work': '距離下一次工作倒計時',
-        'config.tab.general.status.label.break': '距離下一次休息倒計時',
-        'config.tab.general.work.label': '工作時長',
-        'config.tab.general.work.unit': '分鐘',
-        'config.tab.general.break.label': '休息時長',
-        'config.tab.general.break.unit': '分鐘',
-        'config.tab.general.notify.label': '進入休息前提醒',
-        'config.tab.general.notify.tip': '開啟後，休息前10秒彈窗提醒',
-        'config.tab.general.noSkip.label': '不可跳過模式',
-        'config.tab.general.noSkip.tip': '開啟後，休息不可跳過',
-        'config.tab.general.noSkip.confirm.title': '謹慎開啟不可跳過模式',
-        'config.tab.general.noSkip.confirm.desc': '開啟後，每次休息都無法跳過：休息視窗會覆蓋所有螢幕，直到倒數結束才能繼續使用電腦，緊急事務也只能等待。請確認你的工作節奏允許定時強制休息，再謹慎開啟。',
-        'config.tab.general.noSkip.confirm.ok': '我已了解，開啟',
-        'config.tab.general.noSkip.confirm.cancel': '再想想',
-        'config.tab.general.language.label': '語言',
-        'config.tab.general.applyNow.btn': '立即生效',
-        'config.tab.general.applyNow.tip': '工作/休息時長預設從下一階段開始生效。點擊後立即依新時長從工作階段重新計時，效果等同重新啟動應用。',
-        'config.tab.breakWindow': '休息窗',
-        'config.tab.breakWindow.mode.ring': '圓環',
-        'config.tab.breakWindow.mode.flipclock': '翻頁時鐘',
-        'config.tab.breakWindow.tip': '選擇休息窗的倒計時樣式，切換後立即生效。',
-        'config.tab.about.version.label': '版本',
-        'config.tab.about.description.label': '描述',
-        'config.tab.about.description.text': '一款幫助你養成良好工作休息習慣的應用，定時提醒你休息，保護你的健康。',
-    },
-    en: {
-        'config.tab.general': "General",
-        'config.tab.about': "About",
-        'config.tab.general.status.title': "Running",
-        'config.tab.general.status.subtitle.work': 'Currently working',
-        'config.tab.general.status.subtitle.break': 'Currently on break',
-        'config.tab.general.status.label.work': 'Countdown to next work',
-        'config.tab.general.status.label.break': 'Countdown to next break',
-        'config.tab.general.work.label': 'Work duration',
-        'config.tab.general.work.unit': 'min',
-        'config.tab.general.break.label': 'Break duration',
-        'config.tab.general.break.unit': 'min',
-        'config.tab.general.notify.label': 'Notify before break',
-        'config.tab.general.notify.tip': 'Notify 10 seconds before break',
-        'config.tab.general.noSkip.label': 'No-skip mode',
-        'config.tab.general.noSkip.tip': 'Break cannot be skipped when enabled',
-        'config.tab.general.noSkip.confirm.title': 'Enable No-Skip Mode?',
-        'config.tab.general.noSkip.confirm.desc': 'Once enabled, every break becomes mandatory: break windows cover all your displays and you cannot get back to work until the countdown ends — even for urgent tasks. Make sure your workflow allows scheduled forced breaks before turning this on.',
-        'config.tab.general.noSkip.confirm.ok': 'Enable anyway',
-        'config.tab.general.noSkip.confirm.cancel': 'Not now',
-        'config.tab.general.language.label': 'Language',
-        'config.tab.general.applyNow.btn': 'Apply Now',
-        'config.tab.general.applyNow.tip': 'New durations apply from the next work/break phase by default. Click to restart timing from the work phase with the new durations immediately — same as relaunching the app.',
-        'config.tab.breakWindow': 'Break Window',
-        'config.tab.breakWindow.mode.ring': 'Ring',
-        'config.tab.breakWindow.mode.flipclock': 'Flip Clock',
-        'config.tab.breakWindow.tip': 'Choose the countdown style for break windows. Applies immediately.',
-        'config.tab.about.version.label': 'Version',
-        'config.tab.about.description.label': 'Description',
-        'config.tab.about.description.text': 'An app that helps you develop good work-break habits, reminding you to take breaks regularly to protect your health.',
-    },
-};
+function getLocale(language) {
+    return LOCALES[language] || FALLBACK_LOCALE;
+}
+
+// 系统语言 → 应用语言
+function detectLanguage(systemLocale) {
+    for (const [re, code] of window.HB_LANG_MATCH) {
+        if (re.test(systemLocale)) return code;
+    }
+    return window.HB_FALLBACK_LANG;
+}
+
+
 
 
 
@@ -203,7 +124,7 @@ function initSlider(thumb, fill, valueEl, min, max, onDragEnd) {
 function languageChanged(language) {
     document.getElementById('language-select').value = language;
 
-    const i18n = i18nMessages[language] || i18nMessages.en;
+    const i18n = getLocale(language).configMessages;
 
     document.querySelectorAll('[data-translate]').forEach(el => {
         const key = el.getAttribute('data-translate');
@@ -215,15 +136,21 @@ function languageChanged(language) {
 let language_argument = 'zh-CN';
 
 window.addEventListener("DOMContentLoaded", async () => {
+    // 语言选择器按 locale 表动态生成（locales.js 加语言后自动出现）
+    const languageSelect = document.getElementById('language-select');
+    for (const [code, loc] of Object.entries(LOCALES)) {
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = loc.name;
+        languageSelect.appendChild(opt);
+    }
+
     // 首次运行检测：如果是第一次启动，显示配置窗口并标记为非首次
     const settings = await syncSettingsToBackend();
 
     if (settings.first_run) {
         const systemLocale = await locale() || 'zh-CN';
-        // 繁体地区/字形（zh-Hant、zh-TW/HK/MO）用 zh-TW，其余中文（含 zh-Hans）一律 zh-CN
-        const language = /zh[-_]?(hant|tw|hk|mo)/i.test(systemLocale)
-            ? 'zh-TW'
-            : systemLocale.toLowerCase().startsWith('zh') ? 'zh-CN' : 'en';
+        const language = detectLanguage(systemLocale);
 
         // 第一次访问，先获取语言
         // 处理前端第一次语言展示
@@ -277,7 +204,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
         const { phase, remaining, current_language } = event.payload;
 
-        const i18n = i18nMessages[current_language] || i18nMessages.en;
+        const i18n = getLocale(current_language).configMessages;
 
         statusSubtitleEl.textContent = phase === 'work' ? i18n['config.tab.general.status.subtitle.work'] : i18n['config.tab.general.status.subtitle.break'];
         statusLableEl.textContent = phase === 'work' ? i18n['config.tab.general.status.label.break'] : i18n['config.tab.general.status.label.work'];

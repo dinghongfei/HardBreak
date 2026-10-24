@@ -73,13 +73,15 @@ pnpm tauri build
 
 ## 文案
 
-语言只能是 `zh-CN`、`zh-TW`、`en`。HTML 默认是简体中文，用 `data-translate`。同一句用户可见文案要一起改：
+前端语言内容集中在 `src/locales.js`（普通脚本，两个页面都先加载它）：每个 locale 含 `name`、`tips`、`breakMessages`（休息窗）、`configMessages`（配置窗）。加语言三步：
 
-- 休息窗：`src/index.js` 的 `i18nMessages`
-- 配置窗：`src/config.js` 的 `i18nMessages`
-- 托盘菜单和休息前通知：`lib.rs` 的 `I18nTexts`
+1. `src/locales.js` 的 `HB_LOCALES` 加一个 locale 对象（语言选择器由 `config.js` 按表动态生成，不用改 HTML）；
+2. 同文件的 `HB_LANG_MATCH` 登记系统语言前缀映射（未匹配回退 `HB_FALLBACK_LANG`）；
+3. `lib.rs` 的 `LOCALES` 表加托盘菜单和休息前通知文案。
 
-休息提示是 `index.js` 里三种语言各 30 条常量，下标来自 `lib.rs` 的 `rand::random_range(0..30)`。增删提示时三份数组长度必须相同，并改这个区间。
+HTML 默认是简体中文，用 `data-translate`。
+
+提示语下标来自 `lib.rs` 的 `rand::random_range(0..30)`。各语言 `tips` 长度必须相同（目前 30 条），增删时改这个区间。改完任何语言内容后跑 `node scripts/check-locales.js` 校验一致性（tips 条数、键集、映射、lib.rs 覆盖）。
 
 配置窗没有提示语编辑页（旧的静态页面已删除）。未来做提示语设置时放到「休息窗」标签下，持久化到数据库并由休息窗读取；macOS 的 WKWebView 不支持 `prompt()`，编辑弹窗用自绘 UI。
 

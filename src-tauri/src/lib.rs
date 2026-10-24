@@ -131,33 +131,80 @@ struct I18nTexts {
     notification_body: String,
 }
 
+/// 托盘菜单与休息前通知的语言表。新增语言：加一行 Locale 即可，
+/// 同时记得在前端 src/locales.js 中加对应 locale 对象。
+struct Locale {
+    code: &'static str,
+    tray_menu_config: &'static str,
+    tray_menu_quit: &'static str,
+    notification_body: &'static str,
+}
+
+const LOCALES: &[Locale] = &[
+    Locale {
+        code: "zh-CN",
+        tray_menu_config: "配置",
+        tray_menu_quit: "退出",
+        notification_body: "10秒后进入休息，请做好准备",
+    },
+    Locale {
+        code: "zh-TW",
+        tray_menu_config: "配置",
+        tray_menu_quit: "退出",
+        notification_body: "10秒後進入休息，請做好準備",
+    },
+    Locale {
+        code: "en",
+        tray_menu_config: "Settings",
+        tray_menu_quit: "Quit",
+        notification_body: "Rest in 10 seconds, please prepare",
+    },
+    Locale {
+        code: "ja",
+        tray_menu_config: "設定",
+        tray_menu_quit: "終了",
+        notification_body: "10秒後に休憩が始まります。準備をしてください",
+    },
+    Locale {
+        code: "ko",
+        tray_menu_config: "설정",
+        tray_menu_quit: "종료",
+        notification_body: "10초 후 휴식이 시작됩니다. 준비하세요",
+    },
+    Locale {
+        code: "de",
+        tray_menu_config: "Einstellungen",
+        tray_menu_quit: "Beenden",
+        notification_body: "Pause in 10 Sekunden, bitte bereite dich vor",
+    },
+    Locale {
+        code: "fr",
+        tray_menu_config: "Réglages",
+        tray_menu_quit: "Quitter",
+        notification_body: "Pause dans 10 secondes, préparez-vous",
+    },
+    Locale {
+        code: "es",
+        tray_menu_config: "Ajustes",
+        tray_menu_quit: "Salir",
+        notification_body: "Descanso en 10 segundos, prepárate",
+    },
+];
+
 impl I18nTexts {
     fn new(language: &str) -> Self {
-        match language {
-            "zh-CN" => Self {
-                tray_menu_config: "配置".to_string(),
-                tray_menu_quit: "退出".to_string(),
-                notification_title: "HardBreak".to_string(),
-                notification_body: "10秒后进入休息，请做好准备".to_string(),
-            },
-            "zh-TW" => Self {
-                tray_menu_config: "配置".to_string(),
-                tray_menu_quit: "退出".to_string(),
-                notification_title: "HardBreak".to_string(),
-                notification_body: "10秒後進入休息，請做好準備".to_string(),
-            },
-            "en" => Self {
-                tray_menu_config: "Settings".to_string(),
-                tray_menu_quit: "Quit".to_string(),
-                notification_title: "HardBreak".to_string(),
-                notification_body: "Rest in 10 seconds, please prepare".to_string(),
-            },
-            _ => Self {
-                tray_menu_config: "Setting".to_string(),
-                tray_menu_quit: "Quit".to_string(),
-                notification_title: "HardBreak".to_string(),
-                notification_body: "Rest in 10 seconds, please prepare".to_string(),
-            },
+        // 未支持的语言回退到英文
+        let loc = LOCALES
+            .iter()
+            .find(|l| l.code == language)
+            .or_else(|| LOCALES.iter().find(|l| l.code == "en"))
+            .unwrap_or(&LOCALES[0]);
+
+        Self {
+            tray_menu_config: loc.tray_menu_config.to_string(),
+            tray_menu_quit: loc.tray_menu_quit.to_string(),
+            notification_title: "HardBreak".to_string(),
+            notification_body: loc.notification_body.to_string(),
         }
     }
 }
