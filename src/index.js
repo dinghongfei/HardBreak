@@ -85,6 +85,12 @@ function languageChanged(language) {
     const key = el.getAttribute('data-translate');
     el.textContent = i18n[key];
   });
+
+  // 中文「跳过」原来靠空格把两个字撑开。字距只加在中文上，长单词的语言不受影响。
+  document.getElementById('skip-btn').classList.toggle(
+    'is-cjk',
+    language === 'zh-CN' || language === 'zh-TW'
+  );
 }
 
 

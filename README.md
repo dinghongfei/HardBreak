@@ -52,7 +52,7 @@ English | [简体中文](README.zh-CN.md)
 | macOS | [GitHub Releases](https://github.com/dinghongfei/HardBreak/releases) |
 | Linux | Build from source (see **Development** below) |
 
-Languages: English, Simplified Chinese, and Traditional Chinese. On first launch, HardBreak follows the system language.
+Languages: Simplified Chinese, Traditional Chinese, English, Japanese, Korean, German, French, and Spanish. On first launch, HardBreak follows the system language, and uses English when that language is not available.
 
 ## Development
 

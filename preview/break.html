@@ -1,0 +1,156 @@
+<!doctype html>
+<!-- 休息窗文案预览。放在 src 外，安装包不会带上。不参与计时。 -->
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="../src/index.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HardBreak 休息窗预览</title>
+  <script src="../src/locales.js"></script>
+  <style>
+    .preview-hud {
+      position: fixed;
+      left: 12px;
+      bottom: 12px;
+      z-index: 10;
+      max-width: 240px;
+      margin: 0;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.45);
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: left;
+      pointer-events: none;
+    }
+
+    .preview-hud[hidden] {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <p class="preview-hud" id="preview-hud">
+    <span id="preview-status"></span><br />
+    ← → 提示　↑ ↓ 语言　L 跳过/锁定　F 圆环/翻页　H 隐藏此栏
+  </p>
+
+  <div class="container">
+    <div class="container-scaler">
+      <h1 id="level-1-tip" class="level-1-tip"></h1>
+      <p id="level-2-tip" class="level-2-tip"></p>
+
+      <div class="countdown" id="countdown-ring">
+        <svg class="countdown-circle">
+          <circle cx="112" cy="112" r="90" stroke="rgba(255,255,255,0.5)" stroke-width="8" fill="none" />
+          <circle cx="112" cy="112" r="90" stroke="#4ade80" stroke-width="8" fill="none"
+            stroke-dasharray="565.4866776461628" stroke-dashoffset="120" stroke-linecap="round"
+            class="countdown-circle-progress" />
+        </svg>
+        <div class="countdown-text-box">
+          <span class="countdown-text-box-time">
+            <span class="time-minutes">05</span><span class="time-colon">:</span><span class="time-seconds">00</span>
+          </span>
+          <span class="countdown-text-box-label" data-translate="break.countdown.label"></span>
+        </div>
+      </div>
+
+      <div class="flipclock" id="countdown-flipclock" style="display: none;">
+        <div class="flipclock-cards">
+          <div class="flip-digit" data-value="0">
+            <div class="flip-half flip-top"><span>0</span></div>
+            <div class="flip-half flip-bottom"><span>0</span></div>
+          </div>
+          <div class="flip-digit" data-value="5">
+            <div class="flip-half flip-top"><span>5</span></div>
+            <div class="flip-half flip-bottom"><span>5</span></div>
+          </div>
+          <div class="flip-colon"><span></span><span></span></div>
+          <div class="flip-digit" data-value="0">
+            <div class="flip-half flip-top"><span>0</span></div>
+            <div class="flip-half flip-bottom"><span>0</span></div>
+          </div>
+          <div class="flip-digit" data-value="0">
+            <div class="flip-half flip-top"><span>0</span></div>
+            <div class="flip-half flip-bottom"><span>0</span></div>
+          </div>
+        </div>
+        <span class="countdown-text-box-label" data-translate="break.countdown.label"></span>
+      </div>
+
+      <div id="lock-tip" class="lock-tip" style="display: none;">
+        <span>&#128274;</span>
+        <span data-translate="break.lock.tip"></span>
+      </div>
+
+      <button id="skip-btn" class="skip-btn" type="button" data-translate="break.skip.btn"></button>
+    </div>
+  </div>
+
+  <script>
+    const codes = Object.keys(window.HB_LOCALES);
+    let langIndex = 0;
+    let tipIndex = 0;
+    let locked = false;
+    let flip = false;
+    let hudOn = true;
+
+    function render() {
+      const code = codes[langIndex];
+      const locale = window.HB_LOCALES[code];
+      const tip = locale.tips[tipIndex];
+
+      document.getElementById('level-1-tip').textContent = tip.primary;
+      document.getElementById('level-2-tip').textContent = tip.secondary;
+
+      const messages = locale.breakMessages;
+      document.querySelectorAll('[data-translate]').forEach((el) => {
+        el.textContent = messages[el.getAttribute('data-translate')];
+      });
+
+      document.getElementById('skip-btn').classList.toggle(
+        'is-cjk',
+        code === 'zh-CN' || code === 'zh-TW'
+      );
+      document.getElementById('lock-tip').style.display = locked ? '' : 'none';
+      document.getElementById('skip-btn').style.display = locked ? 'none' : '';
+      document.getElementById('countdown-ring').style.display = flip ? 'none' : '';
+      document.getElementById('countdown-flipclock').style.display = flip ? '' : 'none';
+      document.getElementById('preview-hud').hidden = !hudOn;
+      document.getElementById('preview-status').textContent =
+        locale.name + ' · 第 ' + (tipIndex + 1) + '/' + locale.tips.length + ' 条';
+      document.documentElement.lang = code;
+      document.title = 'HardBreak 休息窗预览 · ' + locale.name;
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') {
+        tipIndex = (tipIndex + 1) % window.HB_LOCALES[codes[langIndex]].tips.length;
+      } else if (event.key === 'ArrowLeft') {
+        const length = window.HB_LOCALES[codes[langIndex]].tips.length;
+        tipIndex = (tipIndex - 1 + length) % length;
+      } else if (event.key === 'ArrowDown') {
+        langIndex = (langIndex + 1) % codes.length;
+      } else if (event.key === 'ArrowUp') {
+        langIndex = (langIndex - 1 + codes.length) % codes.length;
+      } else if (event.key === 'l' || event.key === 'L') {
+        locked = !locked;
+      } else if (event.key === 'f' || event.key === 'F') {
+        flip = !flip;
+      } else if (event.key === 'h' || event.key === 'H') {
+        hudOn = !hudOn;
+      } else {
+        return;
+      }
+      event.preventDefault();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+
+</html>

@@ -30,6 +30,7 @@ pnpm tauri build
 | `src-tauri/sqls/01_init.sql` | `settings` 表和默认值 |
 | `src-tauri/capabilities/default.json` | 窗口与插件权限 |
 | `docs/index.html` | 产品落地页，不是应用界面 |
+| `RELEASES.md` | 发版记录：功能清单，以及各语言的商店介绍和关键词 |
 
 `tauri.conf.json` 只预创建 `config_window`（默认隐藏）。休息窗在 `setup` 里按显示器创建，label 为 `break_window_0`、`break_window_1`……没有 label 为 `main` 的窗口。
 
@@ -86,6 +87,10 @@ HTML 默认是简体中文，用 `data-translate`。
 配置窗没有提示语编辑页（旧的静态页面已删除）。未来做提示语设置时放到「休息窗」标签下，持久化到数据库并由休息窗读取；macOS 的 WKWebView 不支持 `prompt()`，编辑弹窗用自绘 UI。
 
 这是原生 HTML，属性用 `class`，不要写 `className`。
+
+## 发版
+
+商店详情不放进 `locales.js`。发版前在 `RELEASES.md` 最上面新增一节。微软商店每种语言填写说明、此版本新增功能、产品功能、短标题、简短描述、关键字。首次提交时「此版本新增功能」留空；已有上一版时只写相对上一版的变化。已经上架的那一节保持原样。
 
 ## 不要做的事
 

@@ -107,7 +107,7 @@
         .lang-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
         .lang-dd {
             position: absolute; top: calc(100% + 8px); right: 0;
-            min-width: 140px; background: #1a1a1a;
+            min-width: 160px; background: #1a1a1a;
             border: 1px solid var(--border-h); border-radius: var(--r);
             padding: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
             opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.97);
@@ -460,6 +460,11 @@
                         <button class="lang-opt active" data-lang="zh-CN">简体中文</button>
                         <button class="lang-opt" data-lang="zh-TW">繁體中文</button>
                         <button class="lang-opt" data-lang="en">English</button>
+                        <button class="lang-opt" data-lang="ja">日本語</button>
+                        <button class="lang-opt" data-lang="ko">한국어</button>
+                        <button class="lang-opt" data-lang="de">Deutsch</button>
+                        <button class="lang-opt" data-lang="fr">Français</button>
+                        <button class="lang-opt" data-lang="es">Español</button>
                     </div>
                 </div>
                 <a class="nav-github" href="https://github.com/dinghongfei/HardBreak" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
@@ -550,7 +555,7 @@
             <div class="feat-card reveal reveal-d3">
                 <div class="feat-ico">🔒</div>
                 <h3 class="feat-name" data-i18n="feat.f4t">不可跳过模式</h3>
-                <p class="feat-text" data-i18n="feat.f4d">开启后休息时无法点击「跳过」，强制养成健康习惯。对自己狠一点，告别拖延。</p>
+                <p class="feat-text" data-i18n="feat.f4d">开启后休息时无法点击「跳过」，这段时间不能回到电脑前。</p>
             </div>
             <div class="feat-card reveal">
                 <div class="feat-ico">🕰️</div>
@@ -680,7 +685,7 @@
             'feat.f1t': '番茄计时', 'feat.f1d': '默认工作 25 分钟 / 休息 5 分钟，时长可自定义。自动循环，让你的工作节奏井然有序。',
             'feat.f2t': '多屏幕支持', 'feat.f2d': '休息时所有显示器均弹出休息提示窗口。无论你在哪块屏幕上操作，都不会错过提醒。',
             'feat.f3t': '动态休息提示', 'feat.f3d': '每次休息随机一条健康提示——喝水、深呼吸、远眺窗外，让休息不再枯燥。',
-            'feat.f4t': '不可跳过模式', 'feat.f4d': '开启后休息时无法点击「跳过」，强制养成健康习惯。对自己狠一点，告别拖延。',
+            'feat.f4t': '不可跳过模式', 'feat.f4d': '开启后休息时无法点击「跳过」，这段时间不能回到电脑前。',
             'feat.f5t': '两种倒计时样式', 'feat.f5d': '圆环或翻页时钟，随手切换，立即生效。翻页时钟的每一次翻动，都提醒你时间在流逝。',
             'feat.f6t': '立即生效', 'feat.f6d': '调整工作/休息时长后，一键从工作阶段重新计时，不必等下一阶段，等同重启应用。',
             'hl.label': '贴心提醒', 'hl.title': '休息前 10 秒，提前预告',
@@ -707,9 +712,9 @@
             'feat.label': '核心功能', 'feat.title': '專注工作，科學休息',
             'feat.desc': '每一個功能都經過精心設計，幫助你在效率與健康之間找到完美平衡。',
             'feat.f1t': '番茄計時', 'feat.f1d': '預設工作 25 分鐘 / 休息 5 分鐘，時長可自訂。自動循環，讓你的工作節奏井然有序。',
-            'feat.f2t': '多螢幕支援', 'feat.f2d': '休息時所有顯示器均彈出休息提示視窗。無論你在哪塊螢幕上操作，都不會錯過提醒。',
+            'feat.f2t': '多螢幕支援', 'feat.f2d': '休息時每塊螢幕都會蓋上全螢幕休息視窗，切換到哪塊螢幕都會遇到。',
             'feat.f3t': '動態休息提示', 'feat.f3d': '每次休息隨機一條健康提示——喝水、深呼吸、遠眺窗外，讓休息不再枯燥。',
-            'feat.f4t': '不可跳過模式', 'feat.f4d': '開啟後休息時無法點擊「跳過」，強制養成健康習慣。對自己嚴格一點，告別拖延。',
+            'feat.f4t': '不可跳過模式', 'feat.f4d': '開啟後休息時無法點擊「跳過」，這段時間不能回到電腦前。',
             'feat.f5t': '兩種倒數計時樣式', 'feat.f5d': '圓環或翻頁時鐘，隨手切換，立即生效。翻頁時鐘的每一次翻動，都提醒你時間在流逝。',
             'feat.f6t': '立即生效', 'feat.f6d': '調整工作/休息時長後，一鍵從工作階段重新計時，不必等下一階段，等同重新啟動應用。',
             'hl.label': '貼心提醒', 'hl.title': '休息前 10 秒，提前預告',
@@ -717,10 +722,10 @@
             'ss.label': '介面預覽', 'ss.title': '簡潔優雅的休息介面',
             'ss.desc': '全螢幕沉浸式休息視窗，圓環或翻頁時鐘倒數計時搭配健康提示，每次休息都是一次小小的放鬆。',
             'ss.cap1': '休息介面 — 可跳過', 'ss.cap2': '休息介面 — 不可跳過模式', 'ss.cap3': '休息介面 — 翻頁時鐘',
-            'cfg.label': '靈活配置', 'cfg.title': '一切盡在你的掌控',
+            'cfg.label': '靈活設定', 'cfg.title': '一切盡在你的掌控',
             'cfg.desc': '自訂工作/休息時長、倒數計時樣式、提醒方式等參數，改完時點「立即生效」馬上重新計時，打造最適合你的工作節奏。',
             'bw.label': '休息視窗樣式', 'bw.title': '圓環，或者翻頁時鐘',
-            'bw.desc': '休息視窗的倒數計時可以選圓環或翻頁時鐘。翻頁時鐘每秒翻動，質感拉滿；即選即生效，下一次休息就用上。',
+            'bw.desc': '休息視窗的倒數計時可以選圓環或翻頁時鐘。翻頁時鐘每秒翻動，很有質感；即選即生效，下一次休息就用上。',
             'cta.title': '是時候善待自己了', 'cta.desc': '免費下載 HardBreak，支援 Windows 與 macOS，從今天開始科學休息。', 'cta.btn.win': 'Windows 下載', 'cta.btn.mac': 'macOS 下載',
             'footer.copy': '\u00a9 2026 HardBreak. 守護你的健康。',
             'footer.privacy': '隱私政策', 'footer.contact': '提交意見',
@@ -750,26 +755,184 @@
             'cfg.label': 'FLEXIBLE SETTINGS', 'cfg.title': 'Everything under your control',
             'cfg.desc': 'Tune work and break durations, countdown style, notifications and more — hit Apply Now to restart timing right away. Build the rhythm that fits you best.',
             'bw.label': 'BREAK WINDOW STYLE', 'bw.title': 'Ring, or flip clock',
-            'bw.desc': 'Pick a ring or a flip clock for the break countdown — the flip clock ticks every second with a satisfying flip. Switch anytime; it applies instantly, and your next break uses it.',
+            'bw.desc': 'Pick a ring or a flip clock for the break countdown — the flip clock flips once a second with a satisfying flip. Switch anytime; it applies instantly, and your next break uses it.',
             'cta.title': 'Time to take care of yourself', 'cta.desc': 'Download HardBreak for free on Windows and macOS, and start resting the smart way.', 'cta.btn.win': 'Download for Windows', 'cta.btn.mac': 'Download for macOS',
             'footer.copy': '\u00a9 2026 HardBreak. Protecting your health.',
             'footer.privacy': 'Privacy Policy', 'footer.contact': 'Feedback',
             '_meta.title': 'HardBreak \u2014 Pomodoro Timer + Enforced Break Reminders',
             '_meta.desc': 'Work for a while, then truly rest. HardBreak puts a fullscreen break window on every display to protect your eyes and posture.'
+        },
+        'ja': {
+            'nav.features': '機能', 'nav.screenshots': '画面', 'nav.download': 'ダウンロード',
+            'hero.badge': 'Windows と macOS のデスクトップアプリ',
+            'hero.subtitle': 'しばらく働いたら、きちんと休む。すべての画面に全画面の休憩ウィンドウを出して、目と姿勢を守ります。',
+            'hero.cta.win': 'Windows 版を入手', 'hero.cta.mac': 'macOS 版を入手', 'hero.cta2': '詳しく見る',
+            'trust.t1': 'プライバシー優先、データ収集なし', 'trust.t2': 'ごく低いリソース使用', 'trust.t3': '広告なしでスッキリ',
+            'feat.label': '主な機能', 'feat.title': '集中して働き、賢く休む',
+            'feat.desc': '効率と健康のバランスを取るために、ひとつひとつの機能を丁寧に設計しています。',
+            'feat.f1t': 'ポモドーロタイマー', 'feat.f1d': '初期設定は作業 25 分 / 休憩 5 分。時間は自由に変えられ、自動で繰り返します。',
+            'feat.f2t': 'マルチ画面対応', 'feat.f2d': '休憩になると、つながっているすべての画面に休憩ウィンドウが出ます。どの画面にいても見逃しません。',
+            'feat.f3t': '動的な休憩ヒント', 'feat.f3d': '休憩のたびに健康のヒントが 1 つ——水分補給、深呼吸、遠くを見る。休憩が単調になりません。',
+            'feat.f4t': 'スキップ不可モード', 'feat.f4d': '有効にすると、休憩中は「スキップ」を押せません。カウントダウンが終わるまで席を離れてください。',
+            'feat.f5t': '2 種類のカウントダウン', 'feat.f5d': '円形とめくり時計をいつでも切り替えられ、すぐに反映されます。めくり時計の一枚ごとに、時間が進むのを感じられます。',
+            'feat.f6t': '今すぐ適用', 'feat.f6d': '作業・休憩時間を変えたら、ワンクリックで作業段階から計り直せます。次の段階を待つ必要はありません。',
+            'hl.label': 'やさしい予告', 'hl.title': '休憩の 10 秒前に、先に知らせる',
+            'hl.desc': '作業が終わる前にシステム通知が届き、進捗を保存してから落ち着いて休憩に入れます。',
+            'ss.label': '画面プレビュー', 'ss.title': 'すっきりした休憩画面',
+            'ss.desc': '全画面の休憩ウィンドウに、円形またはめくり時計のカウントダウンと健康のヒント。毎回の休憩が小さなリフレッシュになります。',
+            'ss.cap1': '休憩画面 — スキップ可', 'ss.cap2': '休憩画面 — スキップ不可', 'ss.cap3': '休憩画面 — めくり時計',
+            'cfg.label': '柔軟な設定', 'cfg.title': 'すべて自分のペースで',
+            'cfg.desc': '作業・休憩時間、カウントダウンの見た目、通知などを調整し、「今すぐ適用」でただちに計り直せます。自分に合うリズムを作れます。',
+            'bw.label': '休憩ウィンドウの見た目', 'bw.title': '円形、またはめくり時計',
+            'bw.desc': '休憩のカウントダウンは円形とめくり時計から選べます。めくり時計は 1 秒ごとにめくります。選べばすぐに反映され、次の休憩から使えます。',
+            'cta.title': '自分を大切にする時間です', 'cta.desc': 'HardBreak を Windows と macOS で無料ダウンロードして、今日から賢く休みましょう。', 'cta.btn.win': 'Windows 版を入手', 'cta.btn.mac': 'macOS 版を入手',
+            'footer.copy': '\u00a9 2026 HardBreak. 健康を守る。',
+            'footer.privacy': 'プライバシーポリシー', 'footer.contact': 'フィードバック',
+            '_meta.title': 'HardBreak — ポモドーロ + 強制休憩',
+            '_meta.desc': 'しばらく働いたら、きちんと休む。すべての画面に全画面の休憩ウィンドウを出して、目と姿勢を守ります。'
+        },
+        'ko': {
+            'nav.features': '기능', 'nav.screenshots': '미리보기', 'nav.download': '다운로드',
+            'hero.badge': 'Windows 및 macOS 데스크톱 앱',
+            'hero.subtitle': '한동안 일한 뒤, 제대로 쉽니다. 모든 화면에 전체 화면 휴식 창을 띄워 눈과 자세를 지켜 줍니다.',
+            'hero.cta.win': 'Windows 다운로드', 'hero.cta.mac': 'macOS 다운로드', 'hero.cta2': '더 알아보기',
+            'trust.t1': '개인정보 우선, 데이터 수집 없음', 'trust.t2': '아주 낮은 리소스 사용', 'trust.t3': '광고 없는 깔끔한 앱',
+            'feat.label': '핵심 기능', 'feat.title': '집중해서 일하고, 똑똑하게 쉬기',
+            'feat.desc': '생산성과 건강의 균형을 맞추도록 기능 하나하나를 신중히 설계했습니다.',
+            'feat.f1t': '포모도로 타이머', 'feat.f1d': '기본 작업 25분 / 휴식 5분. 시간은 자유롭게 조절되며 자동으로 반복됩니다.',
+            'feat.f2t': '다중 화면 지원', 'feat.f2d': '휴식이 시작되면 연결된 모든 화면에 휴식 창이 뜹니다. 어느 화면을 쓰더라도 놓치지 않습니다.',
+            'feat.f3t': '동적 휴식 안내', 'feat.f3d': '휴식마다 건강 안내가 하나——물 마시기, 심호흡, 먼 곳 보기. 휴식이 지루하지 않습니다.',
+            'feat.f4t': '건너뛰기 불가 모드', 'feat.f4d': '켜면 휴식 중 「건너뛰기」를 누를 수 없습니다. 카운트다운이 끝날 때까지 자리를 비우세요.',
+            'feat.f5t': '두 가지 카운트다운', 'feat.f5d': '원형과 플립 시계를 언제든 바꿀 수 있고 바로 적용됩니다. 플립 시계가 한 장씩 넘어갈 때마다 시간이 흐릅니다.',
+            'feat.f6t': '지금 적용', 'feat.f6d': '작업·휴식 시간을 바꾼 뒤, 한 번 클릭으로 작업 단계부터 다시 시작합니다. 다음 단계를 기다릴 필요가 없습니다.',
+            'hl.label': '세심한 알림', 'hl.title': '휴식 10초 전, 미리 알려 줍니다',
+            'hl.desc': '작업이 끝나기 전에 시스템 알림이 떠서, 진행 상황을 저장한 뒤 여유 있게 휴식으로 들어갈 수 있습니다.',
+            'ss.label': '화면 미리보기', 'ss.title': '깔끔하고 단정한 휴식 화면',
+            'ss.desc': '전체 화면 휴식 창에 원형 또는 플립 시계 카운트다운과 건강 안내. 매 휴식이 작은 휴식이 됩니다.',
+            'ss.cap1': '휴식 화면 — 건너뛰기 가능', 'ss.cap2': '휴식 화면 — 건너뛰기 불가', 'ss.cap3': '휴식 화면 — 플립 시계',
+            'cfg.label': '유연한 설정', 'cfg.title': '모든 것이 내 손안에',
+            'cfg.desc': '작업·휴식 시간, 카운트다운 스타일, 알림 등을 조정하고 「지금 적용」으로 바로 다시 측정합니다. 내게 맞는 리듬을 만들 수 있습니다.',
+            'bw.label': '휴식 창 스타일', 'bw.title': '원형, 또는 플립 시계',
+            'bw.desc': '휴식 카운트다운은 원형과 플립 시계 중에서 고를 수 있습니다. 플립 시계는 1초마다 넘어갑니다. 고르면 바로 적용되고, 다음 휴식부터 씁니다.',
+            'cta.title': '자신을 돌볼 시간입니다', 'cta.desc': 'Windows와 macOS에서 HardBreak를 무료로 내려받고, 오늘부터 똑똑하게 쉬세요.', 'cta.btn.win': 'Windows 다운로드', 'cta.btn.mac': 'macOS 다운로드',
+            'footer.copy': '\u00a9 2026 HardBreak. 건강을 지켜 줍니다.',
+            'footer.privacy': '개인정보 처리방침', 'footer.contact': '피드백',
+            '_meta.title': 'HardBreak — 포모도로 + 강제 휴식',
+            '_meta.desc': '한동안 일한 뒤, 제대로 쉽니다. 모든 화면에 전체 화면 휴식 창을 띄워 눈과 자세를 지켜 줍니다.'
+        },
+        'de': {
+            'nav.features': 'Funktionen', 'nav.screenshots': 'Vorschau', 'nav.download': 'Download',
+            'hero.badge': 'Windows- und macOS-Desktop-App',
+            'hero.subtitle': 'Erst arbeiten, dann wirklich Pause. HardBreak legt auf jedem Bildschirm ein Vollbild-Pausenfenster darüber und schützt Augen und Haltung.',
+            'hero.cta.win': 'Für Windows laden', 'hero.cta.mac': 'Für macOS laden', 'hero.cta2': 'Mehr erfahren',
+            'trust.t1': 'Privatsphäre zuerst, keine Datenerfassung', 'trust.t2': 'Sehr geringer Ressourcenverbrauch', 'trust.t3': 'Sauber und werbefrei',
+            'feat.label': 'KERNFUNKTIONEN', 'feat.title': 'Fokussiert arbeiten. Klug pausieren.',
+            'feat.desc': 'Jede Funktion ist darauf ausgelegt, Produktivität und Gesundheit ins Gleichgewicht zu bringen.',
+            'feat.f1t': 'Pomodoro-Timer', 'feat.f1d': 'Voreingestellt 25 Min. Arbeit / 5 Min. Pause, frei einstellbar. Der Zyklus läuft automatisch weiter.',
+            'feat.f2t': 'Mehrere Bildschirme', 'feat.f2d': 'Bei Pause erscheinen Fenster auf allen angeschlossenen Displays. Egal, an welchem Schirm du sitzt — du verpasst nichts.',
+            'feat.f3t': 'Dynamische Pausentipps', 'feat.f3d': 'Jede Pause zeigt zufällig einen Gesundheitstipp — Wasser trinken, tief atmen, in die Ferne schauen. Pausen bleiben abwechslungsreich.',
+            'feat.f4t': 'Pflichtpause', 'feat.f4d': 'Ist sie aktiv, lässt sich die Pause nicht überspringen. Bis der Countdown endet, bleibst du weg vom Rechner.',
+            'feat.f5t': 'Zwei Countdown-Stile', 'feat.f5d': 'Ring oder Fallblattuhr — jederzeit wechseln, sofort wirksam. Jedes Umklappen erinnert daran, dass Zeit vergeht.',
+            'feat.f6t': 'Sofort anwenden', 'feat.f6d': 'Arbeits- oder Pausendauer geändert? Mit einem Klick startet die Zeit ab der Arbeitsphase neu — ohne auf die nächste Phase zu warten.',
+            'hl.label': 'AUFMERKSAMES DESIGN', 'hl.title': '10 Sekunden Vorwarnung vor der Pause',
+            'hl.desc': 'Eine Systemmitteilung erscheint vor jeder Pause, damit du speichern und in Ruhe abschließen kannst.',
+            'ss.label': 'VORSCHAU', 'ss.title': 'Klare, ruhige Pausenansicht',
+            'ss.desc': 'Immersive Vollbild-Pausenfenster mit Ring- oder Fallblatt-Countdown und Gesundheitstipps. Jede Pause ist ein kleiner Reset.',
+            'ss.cap1': 'Pausenansicht — überspringbar', 'ss.cap2': 'Pausenansicht — Pflichtpause', 'ss.cap3': 'Pausenansicht — Fallblattuhr',
+            'cfg.label': 'FLEXIBLE EINSTELLUNGEN', 'cfg.title': 'Alles unter deiner Kontrolle',
+            'cfg.desc': 'Arbeits- und Pausendauer, Countdown-Stil, Mitteilungen und mehr — mit Sofort anwenden startest du sofort neu. Finde den Rhythmus, der zu dir passt.',
+            'bw.label': 'PAUSENFENSTER-STIL', 'bw.title': 'Ring oder Fallblattuhr',
+            'bw.desc': 'Wähle Ring oder Fallblattuhr für den Pausencountdown. Die Fallblattuhr klappt einmal pro Sekunde um. Wechsel gilt sofort, die nächste Pause nutzt ihn.',
+            'cta.title': 'Zeit, gut zu dir zu sein', 'cta.desc': 'Lade HardBreak kostenlos für Windows und macOS und beginne heute, klug zu pausieren.', 'cta.btn.win': 'Für Windows laden', 'cta.btn.mac': 'Für macOS laden',
+            'footer.copy': '\u00a9 2026 HardBreak. Schützt deine Gesundheit.',
+            'footer.privacy': 'Datenschutz', 'footer.contact': 'Feedback',
+            '_meta.title': 'HardBreak — Pomodoro + Pflichtpause',
+            '_meta.desc': 'Erst arbeiten, dann wirklich Pause. HardBreak legt auf jedem Bildschirm ein Vollbild-Pausenfenster darüber und schützt Augen und Haltung.'
+        },
+        'fr': {
+            'nav.features': 'Fonctions', 'nav.screenshots': 'Aperçu', 'nav.download': 'Télécharger',
+            'hero.badge': 'Application bureau Windows et macOS',
+            'hero.subtitle': 'Travaillez un moment, puis reposez-vous vraiment. HardBreak affiche une pause plein écran sur chaque moniteur pour protéger vos yeux et votre posture.',
+            'hero.cta.win': 'Télécharger pour Windows', 'hero.cta.mac': 'Télécharger pour macOS', 'hero.cta2': 'En savoir plus',
+            'trust.t1': 'Vie privée d\'abord, aucune collecte', 'trust.t2': 'Très faible consommation', 'trust.t3': 'Propre, sans publicité',
+            'feat.label': 'FONCTIONS CLÉS', 'feat.title': 'Restez concentré. Pausez mieux.',
+            'feat.desc': 'Chaque fonction est pensée pour équilibrer productivité et santé.',
+            'feat.f1t': 'Minuteur Pomodoro', 'feat.f1d': 'Par défaut 25 min de travail / 5 min de pause, entièrement réglable. Le cycle se répète tout seul.',
+            'feat.f2t': 'Plusieurs écrans', 'feat.f2d': 'À la pause, une fenêtre apparaît sur tous les écrans connectés. Quel que soit celui que vous utilisez, vous ne manquez rien.',
+            'feat.f3t': 'Conseils de pause dynamiques', 'feat.f3d': 'Un conseil santé au hasard à chaque pause — boire, respirer, regarder au loin. Les pauses restent vivantes.',
+            'feat.f4t': 'Pause obligatoire', 'feat.f4d': 'Activée, la pause ne peut pas être passée. Attendez la fin du compte à rebours avant de reprendre.',
+            'feat.f5t': 'Deux styles de compte à rebours', 'feat.f5d': 'Anneau ou horloge à volets — changez quand vous voulez, effet immédiat. Chaque bascule rappelle que le temps passe.',
+            'feat.f6t': 'Appliquer maintenant', 'feat.f6d': 'Durées modifiées ? Relancez le minuteur depuis la phase de travail en un clic — sans attendre la phase suivante.',
+            'hl.label': 'DESIGN ATTENTIF', 'hl.title': 'Avertissement 10 secondes avant la pause',
+            'hl.desc': 'Une notification système apparaît avant chaque pause, le temps d\'enregistrer et de conclure tranquillement.',
+            'ss.label': 'APERÇU', 'ss.title': 'Un écran de pause net et élégant',
+            'ss.desc': 'Fenêtres de pause immersives en plein écran, compte à rebours en anneau ou à volets, et conseils santé. Chaque pause est un petit moment de souffle.',
+            'ss.cap1': 'Écran de pause — avec saut', 'ss.cap2': 'Écran de pause — obligatoire', 'ss.cap3': 'Écran de pause — horloge à volets',
+            'cfg.label': 'RÉGLAGES SOUPLES', 'cfg.title': 'Tout sous votre contrôle',
+            'cfg.desc': 'Ajustez durées, style de compte à rebours, notifications… puis « Appliquer maintenant » pour reprendre tout de suite. Créez le rythme qui vous convient.',
+            'bw.label': 'STYLE DE FENÊTRE DE PAUSE', 'bw.title': 'Anneau, ou horloge à volets',
+            'bw.desc': 'Choisissez un anneau ou une horloge à volets pour le compte à rebours. L\'horloge bascule une fois par seconde. Le choix s\'applique immédiatement à la prochaine pause.',
+            'cta.title': 'Il est temps de prendre soin de vous', 'cta.desc': 'Téléchargez HardBreak gratuitement sur Windows et macOS, et commencez dès aujourd\'hui à pauser intelligemment.', 'cta.btn.win': 'Télécharger pour Windows', 'cta.btn.mac': 'Télécharger pour macOS',
+            'footer.copy': '\u00a9 2026 HardBreak. Protège votre santé.',
+            'footer.privacy': 'Confidentialité', 'footer.contact': 'Commentaires',
+            '_meta.title': 'HardBreak — Pomodoro + pause forcée',
+            '_meta.desc': 'Travaillez un moment, puis reposez-vous vraiment. HardBreak affiche une pause plein écran sur chaque moniteur pour protéger vos yeux et votre posture.'
+        },
+        'es': {
+            'nav.features': 'Funciones', 'nav.screenshots': 'Vista previa', 'nav.download': 'Descargar',
+            'hero.badge': 'App de escritorio para Windows y macOS',
+            'hero.subtitle': 'Trabaja un rato y descansa de verdad. HardBreak pone una ventana de descanso a pantalla completa en cada monitor para cuidar tus ojos y tu postura.',
+            'hero.cta.win': 'Descargar para Windows', 'hero.cta.mac': 'Descargar para macOS', 'hero.cta2': 'Saber más',
+            'trust.t1': 'Privacidad primero, sin recopilar datos', 'trust.t2': 'Uso mínimo de recursos', 'trust.t3': 'Limpia, sin anuncios',
+            'feat.label': 'FUNCIONES CLAVE', 'feat.title': 'Concéntrate. Descansa bien.',
+            'feat.desc': 'Cada función está pensada para equilibrar productividad y salud.',
+            'feat.f1t': 'Temporizador Pomodoro', 'feat.f1d': 'Por defecto 25 min de trabajo / 5 min de descanso, totalmente ajustable. El ciclo se repite solo.',
+            'feat.f2t': 'Varios monitores', 'feat.f2d': 'Al empezar el descanso, aparece una ventana en todas las pantallas conectadas. Da igual cuál uses: no te lo pierdes.',
+            'feat.f3t': 'Consejos de descanso dinámicos', 'feat.f3d': 'Un consejo de salud al azar en cada descanso: beber agua, respirar hondo, mirar a lo lejos. Los descansos no se vuelven aburridos.',
+            'feat.f4t': 'Descanso obligatorio', 'feat.f4d': 'Activado, el descanso no se puede saltar. Espera a que termine la cuenta atrás antes de volver al ordenador.',
+            'feat.f5t': 'Dos estilos de cuenta atrás', 'feat.f5d': 'Anillo o reloj de paletas: cámbialo cuando quieras, efecto inmediato. Cada volteo recuerda que el tiempo pasa.',
+            'feat.f6t': 'Aplicar ahora', 'feat.f6d': '¿Cambiaste las duraciones? Reinicia el temporizador desde la fase de trabajo con un clic, sin esperar a la siguiente fase.',
+            'hl.label': 'DISEÑO ATENTO', 'hl.title': 'Aviso 10 segundos antes del descanso',
+            'hl.desc': 'Una notificación del sistema aparece antes de cada descanso, para que guardes el progreso y cierres con calma.',
+            'ss.label': 'VISTA PREVIA', 'ss.title': 'Pantalla de descanso limpia y elegante',
+            'ss.desc': 'Ventanas inmersivas a pantalla completa, cuenta atrás en anillo o reloj de paletas, y consejos de salud. Cada descanso es un pequeño respiro.',
+            'ss.cap1': 'Pantalla de descanso — se puede saltar', 'ss.cap2': 'Pantalla de descanso — obligatorio', 'ss.cap3': 'Pantalla de descanso — reloj de paletas',
+            'cfg.label': 'AJUSTES FLEXIBLES', 'cfg.title': 'Todo bajo tu control',
+            'cfg.desc': 'Ajusta duraciones, estilo de cuenta atrás, avisos y más; pulsa Aplicar ahora para reiniciar al instante. Crea el ritmo que te encaje.',
+            'bw.label': 'ESTILO DE VENTANA DE DESCANSO', 'bw.title': 'Anillo, o reloj de paletas',
+            'bw.desc': 'Elige anillo o reloj de paletas para la cuenta atrás. El reloj voltea una vez por segundo. El cambio se aplica al instante y el próximo descanso lo usa.',
+            'cta.title': 'Es hora de cuidarte', 'cta.desc': 'Descarga HardBreak gratis en Windows y macOS, y empieza hoy a descansar con sentido.', 'cta.btn.win': 'Descargar para Windows', 'cta.btn.mac': 'Descargar para macOS',
+            'footer.copy': '\u00a9 2026 HardBreak. Cuidando tu salud.',
+            'footer.privacy': 'Privacidad', 'footer.contact': 'Comentarios',
+            '_meta.title': 'HardBreak — Pomodoro + descanso forzado',
+            '_meta.desc': 'Trabaja un rato y descansa de verdad. HardBreak pone una ventana de descanso a pantalla completa en cada monitor para cuidar tus ojos y tu postura.'
         }
     };
 
     const IMG = {
         'zh-CN': { config: 'images/中文-配置.png', breakcfg: 'images/中文-配置-倒计时配置.png', notify: 'images/中文-休息提醒.png', skip: 'images/中文-休息-可跳过.png', noskip: 'images/中文-休息-不可跳过.png', flip: 'images/中文-休息页面-flipclock效果.png' },
         'zh-TW': { config: 'images/繁体-配置.png', breakcfg: 'images/繁体-配置-倒计时配置.png', notify: 'images/繁体-休息提醒.png', skip: 'images/繁体-休息-可跳过.png', noskip: 'images/繁体-休息-不可跳过.png', flip: 'images/繁体-休息页面-flipclock效果.png' },
-        'en':    { config: 'images/英语-配置.png', breakcfg: 'images/英语-配置-倒计时配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/英语-休息-可跳过.png', noskip: 'images/英语-休息-不可跳过.png', flip: 'images/英语-休息页面-flipclock效果.png' }
+        'en':    { config: 'images/英语-配置.png', breakcfg: 'images/英语-配置-倒计时配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/英语-休息-可跳过.png', noskip: 'images/英语-休息-不可跳过.png', flip: 'images/英语-休息页面-flipclock效果.png' },
+        // 休息前 10 秒提醒截图尚未补齐，暂用英文图。
+        'ja':    { config: 'images/日语-配置.png', breakcfg: 'images/日语-配置-倒计时配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/日语-休息-可跳过.png', noskip: 'images/日语-休息-不可跳过.png', flip: 'images/日语-休息页面-flipclock效果.png' },
+        'ko':    { config: 'images/韩语-配置.png', breakcfg: 'images/韩语-配置-倒计时配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/韩语-休息-可跳过.png', noskip: 'images/韩语-休息-不可跳过.png', flip: 'images/韩语-休息页面-flipclock效果.png' },
+        'de':    { config: 'images/德语-配置.png', breakcfg: 'images/德语-配置-倒计时配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/德语-休息-可跳过.png', noskip: 'images/德语-休息-不可跳过.png', flip: 'images/德语-休息页面-flipclock效果.png' },
+        'fr':    { config: 'images/法语-配置.png', breakcfg: 'images/法语-配置-倒计时配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/法语-休息-可跳过.png', noskip: 'images/法语-休息-不可跳过.png', flip: 'images/法语-休息页面-flipclock效果.png' },
+        'es':    { config: 'images/西班牙语-配置.png', breakcfg: 'images/西班牙语-配置-倒计时配置.png', notify: 'images/英语-休息提醒.png', skip: 'images/西班牙语-休息-可跳过.png', noskip: 'images/西班牙语-休息-不可跳过.png', flip: 'images/西班牙语-休息页面-flipclock效果.png' }
     };
 
-    const LANG_NAMES = { 'zh-CN': '简体中文', 'zh-TW': '繁體中文', 'en': 'English' };
-    const LANG_HTML  = { 'zh-CN': 'zh-CN', 'zh-TW': 'zh-TW', 'en': 'en' };
+    const LANG_NAMES = {
+        'zh-CN': '简体中文', 'zh-TW': '繁體中文', 'en': 'English',
+        'ja': '日本語', 'ko': '한국어', 'de': 'Deutsch', 'fr': 'Français', 'es': 'Español'
+    };
+    const LANG_HTML = {
+        'zh-CN': 'zh-CN', 'zh-TW': 'zh-TW', 'en': 'en',
+        'ja': 'ja', 'ko': 'ko', 'de': 'de', 'fr': 'fr', 'es': 'es'
+    };
     let cur = 'zh-CN';
 
     function setLang(lang) {
+        if (!T[lang] || !IMG[lang]) return;
         cur = lang;
         const t = T[lang], img = IMG[lang];
 

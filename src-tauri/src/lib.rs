@@ -145,19 +145,19 @@ const LOCALES: &[Locale] = &[
         code: "zh-CN",
         tray_menu_config: "配置",
         tray_menu_quit: "退出",
-        notification_body: "10秒后进入休息，请做好准备",
+        notification_body: "10秒后开始休息，请做好准备",
     },
     Locale {
         code: "zh-TW",
-        tray_menu_config: "配置",
-        tray_menu_quit: "退出",
-        notification_body: "10秒後進入休息，請做好準備",
+        tray_menu_config: "設定",
+        tray_menu_quit: "結束",
+        notification_body: "10秒後開始休息，請做好準備",
     },
     Locale {
         code: "en",
         tray_menu_config: "Settings",
         tray_menu_quit: "Quit",
-        notification_body: "Rest in 10 seconds, please prepare",
+        notification_body: "Your break starts in 10 seconds. Get ready.",
     },
     Locale {
         code: "ja",
@@ -169,25 +169,25 @@ const LOCALES: &[Locale] = &[
         code: "ko",
         tray_menu_config: "설정",
         tray_menu_quit: "종료",
-        notification_body: "10초 후 휴식이 시작됩니다. 준비하세요",
+        notification_body: "10초 후 휴식이 시작됩니다. 준비해 주세요",
     },
     Locale {
         code: "de",
         tray_menu_config: "Einstellungen",
         tray_menu_quit: "Beenden",
-        notification_body: "Pause in 10 Sekunden, bitte bereite dich vor",
+        notification_body: "Deine Pause beginnt in 10 Sekunden. Mach dich bereit.",
     },
     Locale {
         code: "fr",
         tray_menu_config: "Réglages",
         tray_menu_quit: "Quitter",
-        notification_body: "Pause dans 10 secondes, préparez-vous",
+        notification_body: "Votre pause commence dans 10 secondes. Préparez-vous.",
     },
     Locale {
         code: "es",
         tray_menu_config: "Ajustes",
         tray_menu_quit: "Salir",
-        notification_body: "Descanso en 10 segundos, prepárate",
+        notification_body: "El descanso empieza en 10 segundos. Prepárate.",
     },
 ];
 
@@ -593,7 +593,7 @@ fn hide_break_window_on_all_monitors(app: &tauri::AppHandle) {
     // 需要计算下一次要展示的文案,计算index,返回给前端
 
     let mut rng = rand::rng();
-    let index = rng.random_range(0..30); // 生成 [0, 30) 的随机整数，对应三种语言各 30 条提示
+    let index = rng.random_range(0..30); // 生成 [0, 30) 的随机整数，对应八种语言各 30 条提示
 
     // 通知前端：休息已跳过，开始工作阶段
     let _ = app.emit(
