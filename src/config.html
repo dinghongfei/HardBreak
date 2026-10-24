@@ -189,6 +189,19 @@
                 </span>
             </div>
         </div>
+
+        <!-- 不可跳过模式二次确认弹窗（自绘：macOS WKWebView 不支持 confirm()） -->
+        <div class="modal-overlay" id="noSkipConfirm" style="display: none;">
+            <div class="modal-card">
+                <div class="modal-icon">⚠️</div>
+                <h3 class="modal-title" data-translate="config.tab.general.noSkip.confirm.title">谨慎开启不可跳过模式</h3>
+                <p class="modal-desc" data-translate="config.tab.general.noSkip.confirm.desc">开启后，每次休息都无法跳过：休息窗会覆盖所有屏幕，直到倒计时结束才能继续使用电脑，紧急事务也只能等待。请确认你的工作节奏允许定时强制休息，再谨慎开启。</p>
+                <div class="modal-actions">
+                    <button class="modal-btn modal-btn-ghost" id="noSkipCancel" data-translate="config.tab.general.noSkip.confirm.cancel">再想想</button>
+                    <button class="modal-btn modal-btn-warning" id="noSkipOk" data-translate="config.tab.general.noSkip.confirm.ok">我已了解，开启</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 

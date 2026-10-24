@@ -20,6 +20,10 @@ const i18nMessages = {
         'config.tab.general.notify.tip': '开启后，休息前10秒弹窗提醒',
         'config.tab.general.noSkip.label': '不可跳过模式',
         'config.tab.general.noSkip.tip': '开启后，休息不可跳过',
+        'config.tab.general.noSkip.confirm.title': '谨慎开启不可跳过模式',
+        'config.tab.general.noSkip.confirm.desc': '开启后，每次休息都无法跳过：休息窗会覆盖所有屏幕，直到倒计时结束才能继续使用电脑，紧急事务也只能等待。请确认你的工作节奏允许定时强制休息，再谨慎开启。',
+        'config.tab.general.noSkip.confirm.ok': '我已了解，开启',
+        'config.tab.general.noSkip.confirm.cancel': '再想想',
         'config.tab.general.language.label': '语言',
         'config.tab.general.applyNow.btn': '立即生效',
         'config.tab.general.applyNow.tip': '工作/休息时长默认从下一阶段开始生效。点击后立即按新时长从工作阶段重新计时，效果等同重启应用。',
@@ -47,6 +51,10 @@ const i18nMessages = {
         'config.tab.general.notify.tip': '開啟後，休息前10秒彈窗提醒',
         'config.tab.general.noSkip.label': '不可跳過模式',
         'config.tab.general.noSkip.tip': '開啟後，休息不可跳過',
+        'config.tab.general.noSkip.confirm.title': '謹慎開啟不可跳過模式',
+        'config.tab.general.noSkip.confirm.desc': '開啟後，每次休息都無法跳過：休息視窗會覆蓋所有螢幕，直到倒數結束才能繼續使用電腦，緊急事務也只能等待。請確認你的工作節奏允許定時強制休息，再謹慎開啟。',
+        'config.tab.general.noSkip.confirm.ok': '我已了解，開啟',
+        'config.tab.general.noSkip.confirm.cancel': '再想想',
         'config.tab.general.language.label': '語言',
         'config.tab.general.applyNow.btn': '立即生效',
         'config.tab.general.applyNow.tip': '工作/休息時長預設從下一階段開始生效。點擊後立即依新時長從工作階段重新計時，效果等同重新啟動應用。',
@@ -74,6 +82,10 @@ const i18nMessages = {
         'config.tab.general.notify.tip': 'Notify 10 seconds before break',
         'config.tab.general.noSkip.label': 'No-skip mode',
         'config.tab.general.noSkip.tip': 'Break cannot be skipped when enabled',
+        'config.tab.general.noSkip.confirm.title': 'Enable No-Skip Mode?',
+        'config.tab.general.noSkip.confirm.desc': 'Once enabled, every break becomes mandatory: break windows cover all your displays and you cannot get back to work until the countdown ends — even for urgent tasks. Make sure your workflow allows scheduled forced breaks before turning this on.',
+        'config.tab.general.noSkip.confirm.ok': 'Enable anyway',
+        'config.tab.general.noSkip.confirm.cancel': 'Not now',
         'config.tab.general.language.label': 'Language',
         'config.tab.general.applyNow.btn': 'Apply Now',
         'config.tab.general.applyNow.tip': 'New durations apply from the next work/break phase by default. Click to restart timing from the work phase with the new durations immediately — same as relaunching the app.',
@@ -362,14 +374,35 @@ window.addEventListener("DOMContentLoaded", async () => {
     } else {
         noSkipToggle.classList.remove('on');
     }
+
+    function setNoSkipMode(on) {
+        noSkipToggle.classList.toggle('on', on);
+        saveSetting('no_skip_mode', on ? '1' : '0');
+    }
+
+    // 关闭不需要确认；开启前二次确认（自绘弹窗，macOS WKWebView 不支持 confirm()）
+    const noSkipConfirmOverlay = document.getElementById('noSkipConfirm');
+    const closeNoSkipConfirm = () => noSkipConfirmOverlay.style.display = 'none';
+
     noSkipToggle.addEventListener('click', () => {
-        const isOn = noSkipToggle.classList.contains('on');
-        if (isOn) {
-            noSkipToggle.classList.remove('on');
+        if (noSkipToggle.classList.contains('on')) {
+            setNoSkipMode(false);
         } else {
-            noSkipToggle.classList.toggle('on');
+            noSkipConfirmOverlay.style.display = 'flex';
         }
-        saveSetting('no_skip_mode', isOn ? '0' : '1');
+    });
+
+    document.getElementById('noSkipCancel').addEventListener('click', closeNoSkipConfirm);
+    document.getElementById('noSkipOk').addEventListener('click', () => {
+        closeNoSkipConfirm();
+        setNoSkipMode(true);
+    });
+    // 点遮罩或按 Esc 取消
+    noSkipConfirmOverlay.addEventListener('click', (e) => {
+        if (e.target === noSkipConfirmOverlay) closeNoSkipConfirm();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeNoSkipConfirm();
     });
 
 

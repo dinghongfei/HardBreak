@@ -370,6 +370,81 @@ body {
     line-height: 1.5;
 }
 
+/* 二次确认弹窗 */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+}
+
+.modal-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px 28px;
+    width: 360px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+    text-align: center;
+}
+
+.modal-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 8px;
+}
+
+.modal-desc {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btn {
+    flex: 1;
+    padding: 9px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.modal-btn-ghost {
+    background: #f5f5f7;
+    color: #1d1d1f;
+}
+
+.modal-btn-ghost:hover {
+    background: #e8e8ed;
+}
+
+.modal-btn-warning {
+    background: #ff3b30;
+    color: #fff;
+}
+
+.modal-btn-warning:hover {
+    background: #e0342b;
+}
+
 /* 开关 */
 .toggle-switch {
     position: relative;
