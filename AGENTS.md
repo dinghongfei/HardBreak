@@ -53,7 +53,7 @@ pnpm tauri build
 { "phase": "work|break", "duration": 1500, "remaining": 1499, "no_skip_mode": false, "current_language": "zh-CN", "countdown_mode": "ring" }
 ```
 
-`duration` 和 `remaining` 是秒，倒计时按墙钟（`Instant`）推进，系统休眠唤醒后按真实流逝时间计算。工作阶段 `remaining <= 10` 且 `notify_before_break` 时发一次系统通知。
+`duration` 和 `remaining` 是秒，倒计时按真实流逝推进。相邻 tick 间隔超过 2 秒（内部常量 `SLEEP_GAP`，不是设置项）判定为系统休眠：工作阶段休眠 ≤ 休息时长则暂停不计入，> 休息时长视为完成自然休息并走重启路径重置到工作起点；休息阶段休眠计入休息。休眠感知时钟按平台分岔（macOS `CLOCK_MONOTONIC`、Linux `CLOCK_BOOTTIME`、Windows 沿用 `Instant`/QPC），不要用 `std::time::Instant` 直接计时——它在 macOS/Linux 上休眠时会暂停。工作阶段 `remaining <= 10` 且 `notify_before_break` 时发一次系统通知。
 
 - 工作结束：显示所有休息窗，发送 `break_start`。
 - 休息结束：隐藏休息窗，发送 `work_start`：`{ "tips_index": 0, "current_language": "zh-CN" }`。

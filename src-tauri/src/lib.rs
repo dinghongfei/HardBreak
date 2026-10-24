@@ -3,7 +3,7 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::sync::Mutex;
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use tauri::{
     menu::{Menu, MenuItem},
@@ -16,6 +16,32 @@ use tauri_plugin_sql::{Migration, MigrationKind};
 
 // 休息窗口标签前缀（用于标识和批量关闭）
 const BREAK_WINDOW_PREFIX: &str = "break_window_";
+
+/// 相邻 tick 间隔超过该值即判定为系统休眠（内部常量，不作为设置项）。
+const SLEEP_GAP: Duration = Duration::from_secs(2);
+
+/// 计入系统休眠时间的单调时钟，用于检测休眠间隔。
+/// macOS：std Instant 用的 CLOCK_UPTIME_RAW 休眠时暂停，CLOCK_MONOTONIC 才会继续走；
+/// Linux：CLOCK_BOOTTIME 才计入 suspend；Windows：QPC 本就计入休眠，沿用 std Instant。
+#[cfg(target_os = "macos")]
+fn monotonic_now() -> Duration {
+    let mut ts = libc::timespec { tv_sec: 0, tv_nsec: 0 };
+    unsafe { libc::clock_gettime(libc::CLOCK_MONOTONIC, &mut ts) };
+    Duration::new(ts.tv_sec as u64, ts.tv_nsec as u32)
+}
+
+#[cfg(target_os = "linux")]
+fn monotonic_now() -> Duration {
+    let mut ts = libc::timespec { tv_sec: 0, tv_nsec: 0 };
+    unsafe { libc::clock_gettime(libc::CLOCK_BOOTTIME, &mut ts) };
+    Duration::new(ts.tv_sec as u64, ts.tv_nsec as u32)
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "linux")))]
+fn monotonic_now() -> Duration {
+    static START: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+    START.get_or_init(std::time::Instant::now).elapsed()
+}
 
 /// 休息出现前正在前台的应用。主屏点击跳过会把本应用激活并切走全屏空间，结束时把它激活回来。
 #[cfg(target_os = "macos")]
@@ -227,8 +253,11 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                 }
             };
 
-            // 用墙钟推进倒计时：系统休眠/唤醒后按真实流逝时间计算，而不是循环次数
-            let phase_started = Instant::now();
+            // 按真实流逝推进倒计时，并感知系统休眠：
+            // 工作期短休眠（≤ 休息时长）暂停计时；工作期长休眠视为完成自然休息，重置到工作起点；
+            // 休息期休眠计入休息（睡眠本身就是休息）。
+            let mut accumulated = Duration::ZERO; // 当前阶段已累积的有效时间
+            let mut last_tick = monotonic_now();
             let mut notified = false;
 
             loop {
@@ -249,7 +278,34 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                     break;
                 }
 
-                let elapsed = phase_started.elapsed().as_secs() as i32;
+                let now = monotonic_now();
+                let delta = now.saturating_sub(last_tick);
+                last_tick = now;
+
+                if delta > SLEEP_GAP {
+                    // 间隔远超正常 tick：系统经历了休眠
+                    if matches!(phase, TimerPhase::Work) {
+                        let break_seconds = {
+                            let settings = state.settings.lock().unwrap();
+                            settings.break_duration.max(1) as u64 * 60
+                        };
+                        if delta > Duration::from_secs(break_seconds) {
+                            // 工作期长休眠：已睡够一次完整休息，重置到工作起点。
+                            // 复用重启路径：外层逻辑收标志后强制 Work 并换提示语重新开始。
+                            *state.restart_requested.lock().unwrap() = true;
+                            break;
+                        }
+                        // 工作期短休眠：暂停计时，不计入
+                    } else {
+                        // 休息期休眠：计入休息
+                        accumulated += delta;
+                    }
+                } else {
+                    // 正常 tick，计入真实流逝（天然无漂移）
+                    accumulated += delta;
+                }
+
+                let elapsed = accumulated.as_secs() as i32;
                 let remaining = duration_seconds - elapsed;
                 if remaining <= 0 {
                     break;
@@ -286,12 +342,7 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                     }
                 }
 
-                // 睡到相对阶段起点的下一个整秒 tick，单轮开销不会累积成漂移
-                let next_tick = Duration::from_secs((elapsed + 1) as u64);
-                let now = phase_started.elapsed();
-                if next_tick > now {
-                    thread::sleep(next_tick - now);
-                }
+                thread::sleep(Duration::from_secs(1));
             }
 
             // 检查是否请求了立即重启（让新时长马上生效）
