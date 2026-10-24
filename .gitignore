@@ -20,9 +20,9 @@ dist-ssr/
 *.local
 
 # Tauri / Rust
+# Cargo.lock 需要提交：二进制应用锁定依赖版本，保证各平台构建一致
 src-tauri/target/
 src-tauri/gen/
-src-tauri/Cargo.lock
 
 # Editor directories and files
 .vscode/*
