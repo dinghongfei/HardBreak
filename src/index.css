@@ -360,6 +360,122 @@ body {
   animation: colon-blink 1s ease-in-out infinite;
 }
 
+/* ==================== 大字数字 ==================== */
+.digits {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem; /* 32px，与其他样式占位一致 */
+  margin-bottom: 2rem; /* 32px */
+}
+
+.digits-time {
+  font-size: 9rem; /* 144px，起身走远也能看清；缩放交给 container-scaler */
+  font-weight: 600;
+  line-height: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  font-variant-numeric: tabular-nums;
+}
+
+/* 极细进度条：唯一的进度表达，由 index.js 逐帧改 transform */
+.digits-progress {
+  width: 100%;
+  height: 3px;
+  margin-top: 1.5rem; /* 24px */
+  margin-bottom: 1rem; /* 16px */
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.digits-progress-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: #4ade80;
+  transform-origin: left center;
+  /* 逐帧更新 transform，不能加 CSS transition（同圆环的教训） */
+}
+
+/* ==================== 呼吸圆 ==================== */
+.breath {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem; /* 32px，与其他样式占位一致 */
+  margin-bottom: 2rem; /* 32px */
+}
+
+.breath-visual {
+  position: relative;
+  width: 16rem; /* 256px */
+  height: 16rem; /* 256px */
+  margin-bottom: 1rem; /* 16px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 进度容器：remaining 越小整体越小，呼吸振幅随之衰减；由 index.js 逐帧改 transform */
+.breath-shrink {
+  position: absolute;
+  inset: 0;
+  /* 逐帧更新 transform，不能加 CSS transition（同圆环的教训） */
+}
+
+/* 呼吸本体：8 秒一个循环，4 秒吸（放大）4 秒呼（缩小），相位与倒计时无关 */
+/* 薰衣草紫：绿色大面积圆盘在暖色背景上发闷 */
+.breath-circle {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+      rgba(196, 181, 253, 0.3) 0%,
+      rgba(196, 181, 253, 0.12) 55%,
+      transparent 70%);
+  animation: breath-pulse 8s ease-in-out infinite;
+}
+
+/* 外层光环：与本体同相位扩散淡出，增强「呼气扩散」的感觉 */
+.breath-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(196, 181, 253, 0.35);
+  animation: breath-halo 8s ease-in-out infinite;
+}
+
+@keyframes breath-pulse {
+  0%,
+  100% {
+    transform: scale(0.8);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+@keyframes breath-halo {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 0;
+  }
+}
+
+/* 时间文字不参与缩放，保证任何进度下都可读 */
+.breath-time {
+  position: relative;
+  font-size: 2.5rem; /* 40px */
+  font-weight: 600;
+  line-height: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity, 1));
+  font-variant-numeric: tabular-nums;
+}
 
 .rest-text-box {
   margin-bottom: 0.5rem; /* 8px */

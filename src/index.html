@@ -69,6 +69,31 @@
         <span class="countdown-text-box-label" data-translate="break.countdown.label">剩余时间</span>
       </div>
 
+      <!-- 倒计时UI：大字数字（进度条由 index.js 逐帧驱动） -->
+      <div class="digits" id="countdown-digits" style="display: none;">
+        <span class="digits-time">
+          <span class="digits-minutes">00</span><span class="time-colon">:</span><span class="digits-seconds">00</span>
+        </span>
+        <div class="digits-progress">
+          <div class="digits-progress-fill" id="digits-progress-fill"></div>
+        </div>
+        <span class="countdown-text-box-label" data-translate="break.countdown.label">剩余时间</span>
+      </div>
+
+      <!-- 倒计时UI：呼吸圆（呼吸动画是纯 CSS，整体尺寸由 index.js 按进度缩放） -->
+      <div class="breath" id="countdown-breath" style="display: none;">
+        <div class="breath-visual">
+          <div class="breath-shrink" id="breath-shrink">
+            <div class="breath-circle"></div>
+            <div class="breath-halo"></div>
+          </div>
+          <span class="breath-time">
+            <span class="breath-minutes">00</span><span class="time-colon">:</span><span class="breath-seconds">00</span>
+          </span>
+        </div>
+        <span class="countdown-text-box-label" data-translate="break.countdown.label">剩余时间</span>
+      </div>
+
       <!-- 休息提示 -->
       <!-- <div class="rest-text-box">
         👀 看看远处，让眼睛放松一下

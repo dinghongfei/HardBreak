@@ -252,16 +252,15 @@ body {
     line-height: 1.5;
 }
 
-/* 倒计时样式选择 */
+/* 倒计时样式选择：五种样式，三列网格排布 */
 .countdown-mode-list {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     padding: 14px 0;
 }
 
 .countdown-mode-card {
-    flex: 1;
-    max-width: 220px;
     border: 2px solid #e5e5ea;
     border-radius: 12px;
     padding: 20px 16px;
@@ -393,6 +392,70 @@ body {
 
 .mode-preview-sevenseg .sevenseg-colon circle {
     fill: rgba(247, 240, 227, 0.9);
+}
+
+/* 大字数字预览：深色底衬 + 时间 + 迷你进度条 */
+.mode-preview-digits {
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    /* 休息窗同款深色渐变背景 */
+    background: linear-gradient(to bottom right, #1c1917, #292524);
+}
+
+.mini-digits-time {
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
+.mini-digits-progress {
+    width: 64px;
+    height: 2px;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+}
+
+.mini-digits-fill {
+    width: 70%;
+    height: 100%;
+    border-radius: 9999px;
+    background: #4ade80;
+}
+
+/* 呼吸圆预览：深色底衬 + 迷你呼吸圆（与休息窗同节奏缩放） */
+.mode-preview-breath {
+    padding: 8px 12px;
+    border-radius: 10px;
+    /* 休息窗同款深色渐变背景 */
+    background: linear-gradient(to bottom right, #1c1917, #292524);
+}
+
+.mini-breath-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+            rgba(196, 181, 253, 0.35) 0%,
+            rgba(196, 181, 253, 0.15) 55%,
+            transparent 70%);
+    animation: mini-breath-pulse 8s ease-in-out infinite;
+}
+
+@keyframes mini-breath-pulse {
+
+    0%,
+    100% {
+        transform: scale(0.8);
+    }
+
+    50% {
+        transform: scale(1);
+    }
 }
 
 .mode-name {

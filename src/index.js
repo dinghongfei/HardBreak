@@ -106,7 +106,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   // offset=0 表示满环, offset=周长表示空环
   const circumference = 2 * Math.PI * 90;
 
-  // 倒计时样式：ring（圆环，默认）/ flipclock（翻页时钟）/ sevenseg（数码管）
+  // 倒计时样式：ring（圆环，默认）/ flipclock（翻页时钟）/ sevenseg（数码管）/ digits（大字数字）/ breath（呼吸圆）
   const ringEl = document.getElementById('countdown-ring');
   const flipclockEl = document.getElementById('countdown-flipclock');
   const flipDigits = ['flip-m1', 'flip-m2', 'flip-s1', 'flip-s2'].map(id => document.getElementById(id));
@@ -123,10 +123,28 @@ window.addEventListener("DOMContentLoaded", async () => {
     sevensegDigits.push(digit);
   }
 
+  // 大字数字：进度条填充层
+  const digitsMinutesEl = document.querySelector('#countdown-digits .digits-minutes');
+  const digitsSecondsEl = document.querySelector('#countdown-digits .digits-seconds');
+  const digitsProgressFill = document.getElementById('digits-progress-fill');
+
+  // 呼吸圆：按进度整体缩放的容器
+  const breathMinutesEl = document.querySelector('#countdown-breath .breath-minutes');
+  const breathSecondsEl = document.querySelector('#countdown-breath .breath-seconds');
+  const breathShrinkEl = document.getElementById('breath-shrink');
+
+  const countdownEls = {
+    ring: ringEl,
+    flipclock: flipclockEl,
+    sevenseg: sevensegEl,
+    digits: document.getElementById('countdown-digits'),
+    breath: document.getElementById('countdown-breath'),
+  };
+
   function applyCountdownMode(mode) {
-    ringEl.style.display = mode === 'ring' ? '' : 'none';
-    flipclockEl.style.display = mode === 'flipclock' ? '' : 'none';
-    sevensegEl.style.display = mode === 'sevenseg' ? '' : 'none';
+    for (const [key, el] of Object.entries(countdownEls)) {
+      el.style.display = key === mode ? '' : 'none';
+    }
   }
 
   // 最近一次 break 阶段事件的状态，作为本地逐帧插值的基准
@@ -157,6 +175,17 @@ window.addEventListener("DOMContentLoaded", async () => {
       window.HB_SEVENSEG.setDigit(sevensegDigits[1], minutes[1]);
       window.HB_SEVENSEG.setDigit(sevensegDigits[2], seconds[0]);
       window.HB_SEVENSEG.setDigit(sevensegDigits[3], seconds[1]);
+    } else if (countdownMode === 'digits') {
+      digitsMinutesEl.textContent = minutes;
+      digitsSecondsEl.textContent = seconds;
+      const progress = breakState.duration > 0 ? remaining / breakState.duration : 0;
+      digitsProgressFill.style.transform = `scaleX(${Math.max(0, progress)})`;
+    } else if (countdownMode === 'breath') {
+      breathMinutesEl.textContent = minutes;
+      breathSecondsEl.textContent = seconds;
+      const progress = breakState.duration > 0 ? remaining / breakState.duration : 0;
+      // 进度驱动整体尺寸（0.55 ~ 1.0），呼吸振幅随之衰减；呼吸相位由 CSS 动画独立运行
+      breathShrinkEl.style.transform = `scale(${0.55 + 0.45 * Math.max(0, progress)})`;
     } else {
       timeMinutesEl.textContent = minutes;
       timeSecondsEl.textContent = seconds;

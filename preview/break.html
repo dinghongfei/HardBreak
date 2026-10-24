@@ -87,6 +87,29 @@
         <span class="countdown-text-box-label" data-translate="break.countdown.label"></span>
       </div>
 
+      <div class="digits" id="countdown-digits" style="display: none;">
+        <span class="digits-time">
+          <span class="digits-minutes">05</span><span class="time-colon">:</span><span class="digits-seconds">00</span>
+        </span>
+        <div class="digits-progress">
+          <div class="digits-progress-fill" style="transform: scaleX(0.7);"></div>
+        </div>
+        <span class="countdown-text-box-label" data-translate="break.countdown.label"></span>
+      </div>
+
+      <div class="breath" id="countdown-breath" style="display: none;">
+        <div class="breath-visual">
+          <div class="breath-shrink">
+            <div class="breath-circle"></div>
+            <div class="breath-halo"></div>
+          </div>
+          <span class="breath-time">
+            <span class="breath-minutes">05</span><span class="time-colon">:</span><span class="breath-seconds">00</span>
+          </span>
+        </div>
+        <span class="countdown-text-box-label" data-translate="break.countdown.label"></span>
+      </div>
+
       <div id="lock-tip" class="lock-tip" style="display: none;">
         <span>&#128274;</span>
         <span data-translate="break.lock.tip"></span>
@@ -98,7 +121,7 @@
 
   <script>
     const codes = Object.keys(window.HB_LOCALES);
-    const MODES = ['ring', 'flipclock', 'sevenseg'];
+    const MODES = ['ring', 'flipclock', 'sevenseg', 'digits', 'breath'];
     let langIndex = 0;
     let tipIndex = 0;
     let locked = false;
@@ -132,9 +155,9 @@
       );
       document.getElementById('lock-tip').style.display = locked ? '' : 'none';
       document.getElementById('skip-btn').style.display = locked ? 'none' : '';
-      document.getElementById('countdown-ring').style.display = MODES[modeIndex] === 'ring' ? '' : 'none';
-      document.getElementById('countdown-flipclock').style.display = MODES[modeIndex] === 'flipclock' ? '' : 'none';
-      document.getElementById('countdown-sevenseg').style.display = MODES[modeIndex] === 'sevenseg' ? '' : 'none';
+      for (const mode of MODES) {
+        document.getElementById('countdown-' + mode).style.display = MODES[modeIndex] === mode ? '' : 'none';
+      }
       document.getElementById('preview-hud').hidden = !hudOn;
       document.getElementById('preview-status').textContent =
         locale.name + ' · 第 ' + (tipIndex + 1) + '/' + locale.tips.length + ' 条';
