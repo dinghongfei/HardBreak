@@ -352,6 +352,14 @@ window.addEventListener("DOMContentLoaded", async () => {
         updateApplyNowVisibility();
     });
 
+    // 数码管模式卡片的迷你预览：固定显示 05:00，与圆环/翻页卡片一致
+    const miniSevenseg = document.getElementById('mini-sevenseg');
+    ['0', '5', null, '0', '0'].forEach(ch => {
+        miniSevenseg.appendChild(ch === null
+            ? window.HB_SEVENSEG.createColon()
+            : window.HB_SEVENSEG.createDigit(ch));
+    });
+
     // 倒计时样式选择：点击卡片保存，随下一次 app-state-update（≤1秒）同步到休息窗
     const savedCountdownMode = settings.countdown_mode || 'ring';
     document.querySelectorAll('.countdown-mode-card').forEach(card => {

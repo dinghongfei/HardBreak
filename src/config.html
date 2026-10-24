@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>应用配置</title>
     <script src="/locales.js"></script>
+    <script src="/sevenseg.js"></script>
     <script type="module" src="/config.js" defer></script>
 </head>
 
@@ -166,6 +167,12 @@
                         <div class="mini-flip-card"><span>0</span></div>
                     </div>
                     <span class="mode-name" data-translate="config.tab.breakWindow.mode.flipclock">翻页时钟</span>
+                </div>
+                <div class="countdown-mode-card" data-mode="sevenseg">
+                    <div class="mode-preview mode-preview-sevenseg" id="mini-sevenseg">
+                        <!-- 迷你数码管由 config.js 用 sevenseg.js 构建 -->
+                    </div>
+                    <span class="mode-name" data-translate="config.tab.breakWindow.mode.sevenseg">数码管</span>
                 </div>
             </div>
             <p class="countdown-mode-tip" data-translate="config.tab.breakWindow.tip">选择休息窗的倒计时样式，切换后立即生效。</p>

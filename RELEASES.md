@@ -2,7 +2,7 @@
 
 应用版本以 `src-tauri/tauri.conf.json` 的 `version` 为准。商店文案不放进 `src/locales.js`。每种语言单独一套，按下面的微软商店字段填写。
 
-新版本写在最上面。已经提交到商店的那一节不要改。
+新版本写在最上面。开发中的版本只写版本号和各语言的「本版本新增功能」，用一条横线和上一版隔开，这样能看出每个版本开发了哪些功能；提交商店前，再把该版本的完整商店字段补齐成完整一节。已经提交到商店的那一节不要改。
 
 产品名用已保留的 **HardBreak**。它已经够短，各语言的短标题都填 HardBreak。
 
@@ -18,6 +18,44 @@
 | 短标题 | 可选的较短名称 | 本产品用 HardBreak |
 | 简短描述 | 搜索和列表里的短介绍 | 1000 字符。列表里通常只露出前面约 270 个 |
 | 关键字 | 搜索词 | 最多 7 条；每条 40 字符；所有条目里不重复的词最多 21 个 |
+
+## 0.6.0
+
+相对 0.5.0 的新增功能，其余商店字段沿用下方 0.5.0 一节的完整文案。草稿状态，后续功能在各语言下继续追加。
+
+### zh-CN 简体中文
+
+- 休息倒计时新增数码管样式，圆环和翻页时钟仍可使用，切换后立即生效
+
+### zh-TW 繁體中文
+
+- 休息倒數新增數碼管樣式，圓環和翻頁時鐘仍可使用，切換後立即生效
+
+### en English
+
+- LED-digits countdown, alongside the existing ring and flip clock
+
+### ja 日本語
+
+- カウントダウンに7セグ表示を追加。円形とめくり時計も引き続き使えます
+
+### ko 한국어
+
+- 카운트다운에 LED 숫자 스타일을 추가했습니다. 원형과 플립 시계도 그대로 사용할 수 있습니다
+
+### de Deutsch
+
+- Countdown als LED-Ziffern, Ring und Fallblattuhr bleiben verfügbar
+
+### fr Français
+
+- Compte à rebours en chiffres LED ; l'anneau et l'horloge à volets restent disponibles
+
+### es Español
+
+- Cuenta atrás con dígitos LED; el anillo y el reloj de paletas siguen disponibles
+
+---
 
 ## 0.5.0
 

@@ -40,7 +40,7 @@ pnpm tauri build
 
 写入必须走 `src/config.js` 的 `saveSetting`：先 `UPDATE settings`，再同步后端。不要只改数据库或只改 `AppState`。
 
-键：`work_duration`、`break_duration`、`notify_before_break`、`no_skip_mode`、`first_run`、`language`、`countdown_mode`。时长单位是分钟，库里开关和 `first_run` 是 `'1'` / `'0'`，`countdown_mode` 是 `'ring'` / `'flipclock'`。工作滑块 1–120，休息滑块 1–60。时长在**下一阶段开始**时读取，不要在当前倒计时中途重置 `remaining`。
+键：`work_duration`、`break_duration`、`notify_before_break`、`no_skip_mode`、`first_run`、`language`、`countdown_mode`。时长单位是分钟，库里开关和 `first_run` 是 `'1'` / `'0'`，`countdown_mode` 是 `'ring'` / `'flipclock'` / `'sevenseg'`。工作滑块 1–120，休息滑块 1–60。时长在**下一阶段开始**时读取，不要在当前倒计时中途重置 `remaining`。
 
 已安装用户不会重跑 version 1 迁移。改默认值可以改 `01_init.sql`（只影响新库）。给已有库加键时新增一条 `Migration`，不要改已发布的 version 1 SQL 指望它再执行。
 

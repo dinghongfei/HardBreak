@@ -83,7 +83,7 @@ struct AppSettings {
     no_skip_mode: bool,
     first_run: bool,
     language: String,
-    countdown_mode: String, // "ring"（圆环）| "flipclock"（翻页时钟）
+    countdown_mode: String, // "ring"（圆环）| "flipclock"（翻页时钟）| "sevenseg"（数码管）
 }
 
 impl Default for AppSettings {

@@ -310,6 +310,56 @@ body {
   }
 }
 
+/* ==================== 数码管 ==================== */
+/* SVG 结构由 sevenseg.js 生成；点亮颜色用暖白而非红色，避免赛场计时的催促感 */
+.sevenseg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem; /* 32px，与圆环/翻页钟占位一致 */
+  margin-bottom: 2rem; /* 32px */
+}
+
+.sevenseg-digits {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* 12px */
+  margin-bottom: 1rem; /* 16px */
+  /* LED 辉光：落在整个容器上，熄灭段透明度极低，几乎不产生光晕 */
+  filter: drop-shadow(0 0 0.6rem rgba(247, 240, 227, 0.4));
+}
+
+.sevenseg-digit {
+  width: 5rem; /* 80px，高宽比 124:70 ≈ 142px，与翻页卡片高度接近 */
+  height: auto;
+  display: block;
+}
+
+.sevenseg-colon {
+  width: 1.25rem; /* 20px */
+  height: auto;
+  display: block;
+}
+
+/* 熄灭段保留微弱轮廓（幽灵段），数字占位稳定且有真实数码管质感 */
+.seg-line {
+  stroke: rgba(247, 240, 227, 0.09);
+  stroke-width: 10;
+  /* 圆头端帽：火柴棍造型，拐角处永不出尖角 */
+  stroke-linecap: round;
+  /* 段切换淡入淡出，软化每秒的硬跳变；段切换只在秒变化时发生，不会逐帧触发 */
+  transition: stroke 0.18s ease-in-out;
+}
+
+.seg-line.lit {
+  stroke: #f7f0e3;
+}
+
+.sevenseg-colon circle {
+  fill: rgba(247, 240, 227, 0.9);
+  animation: colon-blink 1s ease-in-out infinite;
+}
+
 
 .rest-text-box {
   margin-bottom: 0.5rem; /* 8px */

@@ -359,6 +359,42 @@ body {
     background: #86868b;
 }
 
+/* 数码管预览：深色底衬 + 迷你七段 SVG（结构由 config.js 用 sevenseg.js 生成） */
+.mode-preview-sevenseg {
+    gap: 3px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    /* 休息窗同款深色渐变背景 */
+    background: linear-gradient(to bottom right, #1c1917, #292524);
+}
+
+.mode-preview-sevenseg .sevenseg-digit {
+    width: 14px;
+    height: auto;
+    display: block;
+}
+
+.mode-preview-sevenseg .sevenseg-colon {
+    width: 5px;
+    height: auto;
+    display: block;
+}
+
+/* 与休息窗一致的幽灵段/暖白段配色，迷你预览不需要切换动画 */
+.mode-preview-sevenseg .seg-line {
+    stroke: rgba(247, 240, 227, 0.09);
+    stroke-width: 10;
+    stroke-linecap: round;
+}
+
+.mode-preview-sevenseg .seg-line.lit {
+    stroke: #f7f0e3;
+}
+
+.mode-preview-sevenseg .sevenseg-colon circle {
+    fill: rgba(247, 240, 227, 0.9);
+}
+
 .mode-name {
     font-size: 14px;
     color: #1d1d1f;

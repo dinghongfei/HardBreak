@@ -106,16 +106,27 @@ window.addEventListener("DOMContentLoaded", async () => {
   // offset=0 表示满环, offset=周长表示空环
   const circumference = 2 * Math.PI * 90;
 
-  // 倒计时样式：ring（圆环，默认）/ flipclock（翻页时钟）
+  // 倒计时样式：ring（圆环，默认）/ flipclock（翻页时钟）/ sevenseg（数码管）
   const ringEl = document.getElementById('countdown-ring');
   const flipclockEl = document.getElementById('countdown-flipclock');
   const flipDigits = ['flip-m1', 'flip-m2', 'flip-s1', 'flip-s2'].map(id => document.getElementById(id));
   let countdownMode = 'ring';
 
+  // 数码管：构建 m m : s s 五个 SVG，之后每秒只切换点亮段
+  const sevensegEl = document.getElementById('countdown-sevenseg');
+  const sevensegDigitsBox = document.getElementById('sevenseg-digits');
+  const sevensegDigits = [];
+  for (let i = 0; i < 4; i++) {
+    if (i === 2) sevensegDigitsBox.appendChild(window.HB_SEVENSEG.createColon());
+    const digit = window.HB_SEVENSEG.createDigit('0');
+    sevensegDigitsBox.appendChild(digit);
+    sevensegDigits.push(digit);
+  }
+
   function applyCountdownMode(mode) {
-    const flip = mode === 'flipclock';
-    ringEl.style.display = flip ? 'none' : '';
-    flipclockEl.style.display = flip ? '' : 'none';
+    ringEl.style.display = mode === 'ring' ? '' : 'none';
+    flipclockEl.style.display = mode === 'flipclock' ? '' : 'none';
+    sevensegEl.style.display = mode === 'sevenseg' ? '' : 'none';
   }
 
   // 最近一次 break 阶段事件的状态，作为本地逐帧插值的基准
@@ -141,6 +152,11 @@ window.addEventListener("DOMContentLoaded", async () => {
       setFlipDigit(flipDigits[1], minutes[1]);
       setFlipDigit(flipDigits[2], seconds[0]);
       setFlipDigit(flipDigits[3], seconds[1]);
+    } else if (countdownMode === 'sevenseg') {
+      window.HB_SEVENSEG.setDigit(sevensegDigits[0], minutes[0]);
+      window.HB_SEVENSEG.setDigit(sevensegDigits[1], minutes[1]);
+      window.HB_SEVENSEG.setDigit(sevensegDigits[2], seconds[0]);
+      window.HB_SEVENSEG.setDigit(sevensegDigits[3], seconds[1]);
     } else {
       timeMinutesEl.textContent = minutes;
       timeSecondsEl.textContent = seconds;

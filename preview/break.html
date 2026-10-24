@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HardBreak 休息窗预览</title>
   <script src="../src/locales.js"></script>
+  <script src="../src/sevenseg.js"></script>
   <style>
     .preview-hud {
       position: fixed;
@@ -35,7 +36,7 @@
 <body>
   <p class="preview-hud" id="preview-hud">
     <span id="preview-status"></span><br />
-    ← → 提示　↑ ↓ 语言　L 跳过/锁定　F 圆环/翻页　H 隐藏此栏
+    ← → 提示　↑ ↓ 语言　L 跳过/锁定　F 倒计时样式　H 隐藏此栏
   </p>
 
   <div class="container">
@@ -81,6 +82,11 @@
         <span class="countdown-text-box-label" data-translate="break.countdown.label"></span>
       </div>
 
+      <div class="sevenseg" id="countdown-sevenseg" style="display: none;">
+        <div class="sevenseg-digits" id="sevenseg-digits"></div>
+        <span class="countdown-text-box-label" data-translate="break.countdown.label"></span>
+      </div>
+
       <div id="lock-tip" class="lock-tip" style="display: none;">
         <span>&#128274;</span>
         <span data-translate="break.lock.tip"></span>
@@ -92,11 +98,20 @@
 
   <script>
     const codes = Object.keys(window.HB_LOCALES);
+    const MODES = ['ring', 'flipclock', 'sevenseg'];
     let langIndex = 0;
     let tipIndex = 0;
     let locked = false;
-    let flip = false;
+    let modeIndex = 0;
     let hudOn = true;
+
+    // 数码管静态预览：固定 05:00，与圆环/翻页时钟一致
+    const sevensegBox = document.getElementById('sevenseg-digits');
+    ['0', '5', null, '0', '0'].forEach((ch) => {
+      sevensegBox.appendChild(ch === null
+        ? window.HB_SEVENSEG.createColon()
+        : window.HB_SEVENSEG.createDigit(ch));
+    });
 
     function render() {
       const code = codes[langIndex];
@@ -117,8 +132,9 @@
       );
       document.getElementById('lock-tip').style.display = locked ? '' : 'none';
       document.getElementById('skip-btn').style.display = locked ? 'none' : '';
-      document.getElementById('countdown-ring').style.display = flip ? 'none' : '';
-      document.getElementById('countdown-flipclock').style.display = flip ? '' : 'none';
+      document.getElementById('countdown-ring').style.display = MODES[modeIndex] === 'ring' ? '' : 'none';
+      document.getElementById('countdown-flipclock').style.display = MODES[modeIndex] === 'flipclock' ? '' : 'none';
+      document.getElementById('countdown-sevenseg').style.display = MODES[modeIndex] === 'sevenseg' ? '' : 'none';
       document.getElementById('preview-hud').hidden = !hudOn;
       document.getElementById('preview-status').textContent =
         locale.name + ' · 第 ' + (tipIndex + 1) + '/' + locale.tips.length + ' 条';
@@ -139,7 +155,7 @@
       } else if (event.key === 'l' || event.key === 'L') {
         locked = !locked;
       } else if (event.key === 'f' || event.key === 'F') {
-        flip = !flip;
+        modeIndex = (modeIndex + 1) % MODES.length;
       } else if (event.key === 'h' || event.key === 'H') {
         hudOn = !hudOn;
       } else {
