@@ -58,7 +58,7 @@ pnpm tauri build
 
 - 工作结束：显示所有休息窗，发送 `break_start`。
 - 休息结束：隐藏休息窗，发送 `work_start`：`{ "tips_index": 0, "current_language": "zh-CN" }`。
-- 跳过：前端 `invoke('hide_break_window')`。该命令隐藏休息窗并把阶段设为 `Work`。计时线程发现阶段被外部改掉后直接进入下一轮，不要再补发窗口事件。
+- 跳过：前端按钮或 Esc 键 `invoke('hide_break_window')`。该命令隐藏休息窗并把阶段设为 `Work`。计时线程发现阶段被外部改掉后直接进入下一轮，不要再补发窗口事件。不可跳过模式下按钮隐藏，Esc 同步失效。Esc 在 macOS 必须走 `tauri-plugin-global-shortcut` 全局热键（休息窗是非激活面板，键盘事件到不了 WebView；休息开始时注册、结束时注销、不可跳过模式不注册），前端 keydown 是其他平台和热键注册失败时的回退。
 
 休息窗保持全屏、置顶、无边框、透明、`skip_taskbar`。关闭配置窗改为隐藏。退出只走托盘「退出」。
 

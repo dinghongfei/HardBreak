@@ -116,6 +116,7 @@
       </div>
 
       <button id="skip-btn" class="skip-btn" type="button" data-translate="break.skip.btn"></button>
+      <p id="skip-hint" class="skip-hint" data-translate="break.skip.hint"></p>
     </div>
   </div>
 
@@ -155,6 +156,7 @@
       );
       document.getElementById('lock-tip').style.display = locked ? '' : 'none';
       document.getElementById('skip-btn').style.display = locked ? 'none' : '';
+      document.getElementById('skip-hint').style.display = locked ? 'none' : '';
       for (const mode of MODES) {
         document.getElementById('countdown-' + mode).style.display = MODES[modeIndex] === mode ? '' : 'none';
       }

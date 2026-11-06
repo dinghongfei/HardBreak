@@ -62,6 +62,7 @@ window.HB_LOCALES = {
       'break.countdown.label': '剩余时间',
       'break.lock.tip': '不可跳过模式已开启',
       'break.skip.btn': '跳过',
+      'break.skip.hint': '按 Esc 跳过',
     },
     configMessages: {
       'config.tab.general': '常规',
@@ -137,6 +138,7 @@ window.HB_LOCALES = {
       'break.countdown.label': '剩餘時間',
       'break.lock.tip': '不可跳過模式已開啟',
       'break.skip.btn': '跳過',
+      'break.skip.hint': '按 Esc 跳過',
     },
     configMessages: {
       'config.tab.general': '一般',
@@ -212,6 +214,7 @@ window.HB_LOCALES = {
       'break.countdown.label': 'Remaining Time',
       'break.lock.tip': 'No-skip mode is enabled',
       'break.skip.btn': 'Skip',
+      'break.skip.hint': 'Press Esc to skip',
     },
     configMessages: {
       'config.tab.general': 'General',
@@ -287,6 +290,7 @@ window.HB_LOCALES = {
       'break.countdown.label': '残り時間',
       'break.lock.tip': 'スキップ不可モードが有効です',
       'break.skip.btn': 'スキップ',
+      'break.skip.hint': 'Esc キーでスキップ',
     },
     configMessages: {
       'config.tab.general': '一般',
@@ -362,6 +366,7 @@ window.HB_LOCALES = {
       'break.countdown.label': '남은 시간',
       'break.lock.tip': '건너뛰기 불가 모드가 켜져 있습니다',
       'break.skip.btn': '건너뛰기',
+      'break.skip.hint': 'Esc 키로 건너뛰기',
     },
     configMessages: {
       'config.tab.general': '일반',
@@ -437,6 +442,7 @@ window.HB_LOCALES = {
       'break.countdown.label': 'Verbleibende Zeit',
       'break.lock.tip': 'Pflichtpause ist aktiv',
       'break.skip.btn': 'Überspringen',
+      'break.skip.hint': 'Esc zum Überspringen',
     },
     configMessages: {
       'config.tab.general': 'Allgemein',
@@ -512,6 +518,7 @@ window.HB_LOCALES = {
       'break.countdown.label': 'Temps restant',
       'break.lock.tip': 'La pause obligatoire est activée',
       'break.skip.btn': 'Passer',
+      'break.skip.hint': 'Échap pour passer',
     },
     configMessages: {
       'config.tab.general': 'Général',
@@ -587,6 +594,7 @@ window.HB_LOCALES = {
       'break.countdown.label': 'Tiempo restante',
       'break.lock.tip': 'El descanso obligatorio está activado',
       'break.skip.btn': 'Saltar',
+      'break.skip.hint': 'Esc para saltar',
     },
     configMessages: {
       'config.tab.general': 'General',

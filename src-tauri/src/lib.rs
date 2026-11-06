@@ -505,6 +505,18 @@ pub fn run() {
         )
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(
+            // Esc 全局快捷键：休息窗在 macOS 是非激活面板（NonactivatingPanel +
+            // _setPreventsActivation），键盘事件只路由到激活应用，前端 keydown 收不到，
+            // 只能走全局热键（macOS 为 Carbon RegisterEventHotKey，无需辅助功能权限）。
+            tauri_plugin_global_shortcut::Builder::new()
+                .with_handler(|app, _shortcut, event| {
+                    if event.state() == tauri_plugin_global_shortcut::ShortcutState::Pressed {
+                        hide_break_window(app.clone());
+                    }
+                })
+                .build(),
+        )
         .manage(AppState::default())
         .setup(|app| {
             #[cfg(target_os = "macos")]
@@ -569,6 +581,7 @@ fn show_break_window_on_all_monitors(app: &tauri::AppHandle) {
     let state = app.state::<AppState>();
     let settings = state.settings.lock().unwrap();
     let duration_seconds = settings.break_duration * 60;
+    let no_skip_mode = settings.no_skip_mode;
     let _ = app.emit(
         "app-state-update",
         serde_json::json!({
@@ -582,11 +595,32 @@ fn show_break_window_on_all_monitors(app: &tauri::AppHandle) {
     );
     drop(settings);
 
+    // 不可跳过模式下不注册 Esc，与前端按钮隐藏保持一致
+    if !no_skip_mode {
+        register_escape_shortcut(app);
+    }
+
     let _ = app.emit("break_start", ());
+}
+
+// 休息期间全局注册 Esc 跳过；注册失败（如 Wayland）静默忽略，前端 keydown 是回退路径。
+fn register_escape_shortcut(app: &tauri::AppHandle) {
+    use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Shortcut};
+    let _ = app
+        .global_shortcut()
+        .register(Shortcut::new(None, Code::Escape));
+}
+
+fn unregister_escape_shortcut(app: &tauri::AppHandle) {
+    use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Shortcut};
+    let _ = app
+        .global_shortcut()
+        .unregister(Shortcut::new(None, Code::Escape));
 }
 
 // 隐藏所有休息窗口（不销毁，便于下次快速显示）
 fn hide_break_window_on_all_monitors(app: &tauri::AppHandle) {
+    unregister_escape_shortcut(app);
     let windows = app.webview_windows();
     #[cfg(target_os = "macos")]
     let mut restore_from = None;

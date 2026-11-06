@@ -526,6 +526,14 @@ body {
   border-color: color-mix(in oklab, var(--color-white, #ffffff) 80%, transparent);
 }
 
+/* Esc 快捷键提示：按钮下方一行小字 */
+.skip-hint {
+  font-size: 0.75rem; /* 12px */
+  line-height: 1rem; /* 16px */
+  color: color-mix(in oklab, var(--color-white, #ffffff) 35%, transparent);
+  margin-top: 0.75rem; /* 12px */
+}
+
 
 
 

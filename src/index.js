@@ -25,13 +25,16 @@ function randomizeTips(index = currentTipsIndex, language = 'zh-CN') {
 function updateNoSkipMode(noSkipMode) {
   const lockTip = document.getElementById('lock-tip');
   const skipBtn = document.getElementById('skip-btn');
+  const skipHint = document.getElementById('skip-hint');
 
   if (noSkipMode) {
     lockTip.style.display = '';
     skipBtn.style.display = 'none';
+    skipHint.style.display = 'none';
   } else {
     lockTip.style.display = 'none';
     skipBtn.style.display = '';
+    skipHint.style.display = '';
   }
 }
 
@@ -251,6 +254,14 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
   skipBtn.addEventListener("click", () => {
     // 跳过时，清除主窗口定时器 
+    invoke("hide_break_window");
+  });
+
+  // Esc 快捷键跳过。不可跳过模式下按钮隐藏，快捷键同步失效。
+  // 休息窗在 macOS 是 key window、Windows 已 set_focus，keydown 可达。
+  window.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || event.repeat) return;
+    if (skipBtn.style.display === "none") return;
     invoke("hide_break_window");
   });
 
