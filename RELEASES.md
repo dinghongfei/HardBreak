@@ -29,6 +29,7 @@
 - 新增：休息窗按 Esc 跳过，不可跳过模式下不生效
 - 修复：圆环倒计时的外圈出现方形边框和漏光
 - 修复：副屏睡眠或热插拔后，休息窗只出现在主屏
+- 修复：macOS 全屏显示的应用（如浏览器、终端）不被休息窗覆盖
 
 ### zh-TW 繁體中文
 
@@ -36,6 +37,7 @@
 - 新增：休息視窗按 Esc 跳過，不可跳過模式下不生效
 - 修復：圓環倒數的外圈出現方形邊框和漏光
 - 修復：副螢幕睡眠或熱插拔後，休息視窗只出現在主螢幕
+- 修復：macOS 全螢幕顯示的應用（如瀏覽器、終端機）不被休息視窗覆蓋
 
 ### en English
 
@@ -43,6 +45,7 @@
 - Added: press Esc in the break window to skip; disabled in no-skip mode
 - Fixed: square outline and light leak around the ring countdown
 - Fixed: break windows covering only the primary display after a secondary display sleeps or is hot-plugged
+- Fixed: on macOS, fullscreen apps (e.g. browsers, terminals) were not covered by the break window
 
 ### ja 日本語
 
@@ -50,6 +53,7 @@
 - 追加：休憩画面で Esc キーでスキップ（スキップ不可モードでは無効）
 - 修正：円形カウントダウンの周囲に四角い枠と光漏れが出る問題
 - 修正：副画面のスリープや抜き差しのあと、休憩ウィンドウが主画面にしか表示されない問題
+- 修正：macOS で全画面表示のアプリ（ブラウザ、ターミナルなど）が休憩ウィンドウに覆われない問題
 
 ### ko 한국어
 
@@ -57,6 +61,7 @@
 - 추가: 휴식 화면에서 Esc 키로 건너뛰기(건너뛰기 불가 모드에서는 비활성화)
 - 수정: 원형 카운트다운 주변에 사각형 테두리와 빛샘이 생기던 문제
 - 수정: 보조 화면 절전 또는 hot-plug 후 휴식 창이 주 화면에만 나타나던 문제
+- 수정: macOS에서 전체 화면 앱(브라우저, 터미널 등)이 휴식 창에 가려지지 않던 문제
 
 ### de Deutsch
 
@@ -64,6 +69,7 @@
 - Neu: Pause im Pausenfenster per Esc überspringen; bei Pflichtpause deaktiviert
 - Behoben: quadratischer Rahmen und Lichtschein um den Ring-Countdown
 - Behoben: Pausenfenster erschienen nach Ruhezustand oder Hot-Plug eines Zweitbildschirms nur auf dem Hauptbildschirm
+- Behoben: Vollbild-Apps (z. B. Browser, Terminals) wurden unter macOS nicht vom Pausenfenster überdeckt
 
 ### fr Français
 
@@ -71,6 +77,7 @@
 - Ajout : Échap dans la fenêtre de pause pour passer ; désactivé en pause obligatoire
 - Correctif : cadre carré et fuite de lumière autour du compte à rebours en anneau
 - Correctif : fenêtres de pause qui ne couvraient que l'écran principal après une mise en veille ou un branchement à chaud d'un écran secondaire
+- Correctif : sous macOS, les apps en plein écran (navigateurs, terminaux) n'étaient pas couvertes par la fenêtre de pause
 
 ### es Español
 
@@ -78,6 +85,7 @@
 - Novedad: pulsa Esc en la ventana de descanso para saltarlo; desactivado en descanso obligatorio
 - Corrección: borde cuadrado y fuga de luz alrededor de la cuenta atrás en anillo
 - Corrección: las ventanas de descanso cubrían solo la pantalla principal tras la suspensión o conexión en caliente de una pantalla secundaria
+- Corrección: en macOS, las apps a pantalla completa (navegadores, terminales) no quedaban cubiertas por la ventana de descanso
 
 ---
 

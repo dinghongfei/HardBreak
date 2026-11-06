@@ -808,9 +808,6 @@ fn show_macos_break_covering_each_screen(app: &tauri::AppHandle) {
     let windows: Vec<_> = (0..frames.len())
         .filter_map(|i| app.get_webview_window(&format!("{}{}", BREAK_WINDOW_PREFIX, i)))
         .collect();
-    for window in &windows {
-        let _ = window.show();
-    }
     let Some(anchor) = windows.first().cloned() else {
         return;
     };
@@ -827,16 +824,18 @@ fn show_macos_break_covering_each_screen(app: &tauri::AppHandle) {
         };
         remember_frontmost_app();
 
-        let screens = NSScreen::screens(mtm);
         let level = shielding_window_level();
-        for (window, screen) in windows.iter().zip(screens.iter()) {
+        // 旗标/样式/层级必须在窗口显示之前设好：窗口的 Space 归属在首次 order-in 时定案，
+        // 先 show 再补旗标对已经存在的全屏 Space 无效（全屏 Chrome/终端盖不住的原因）。
+        for window in &windows {
             with_ns_window(window, |ns_window| {
                 let mut behavior = ns_window.collectionBehavior();
                 behavior.remove(NSWindowCollectionBehavior::MoveToActiveSpace);
                 behavior.remove(NSWindowCollectionBehavior::FullScreenPrimary);
                 behavior.remove(NSWindowCollectionBehavior::FullScreenNone);
+                // 盖全屏应用的有效组合：CanJoinAllSpaces + FullScreenAuxiliary + 高层级。
+                // CanJoinAllApplications 在新 macOS 上已无效且干扰归属，不用。
                 behavior.insert(NSWindowCollectionBehavior::CanJoinAllSpaces);
-                behavior.insert(NSWindowCollectionBehavior::CanJoinAllApplications);
                 behavior.insert(NSWindowCollectionBehavior::FullScreenAuxiliary);
                 behavior.insert(NSWindowCollectionBehavior::Stationary);
                 ns_window.setCollectionBehavior(behavior);
@@ -857,9 +856,18 @@ fn show_macos_break_covering_each_screen(app: &tauri::AppHandle) {
                         let _: () = unsafe { objc2::msg_send![&*button, setHidden: true] };
                     }
                 }
-                ns_window.setFrame_display(screen.frame(), false);
                 ns_window.setLevel(level);
                 ns_window.setAcceptsMouseMovedEvents(true);
+            });
+        }
+
+        let screens = NSScreen::screens(mtm);
+        for (window, screen) in windows.iter().zip(screens.iter()) {
+            with_ns_window(window, |ns_window| {
+                ns_window.setFrame_display(screen.frame(), false);
+            });
+            let _ = window.show();
+            with_ns_window(window, |ns_window| {
                 ns_window.orderFrontRegardless();
                 // 先成为 key window，WebKit 才会更新悬浮。再禁止激活应用，避免主屏被切走。
                 ns_window.makeKeyWindow();
@@ -891,9 +899,9 @@ fn show_macos_break_overlay(
             behavior.remove(NSWindowCollectionBehavior::MoveToActiveSpace);
             behavior.remove(NSWindowCollectionBehavior::FullScreenPrimary);
             behavior.remove(NSWindowCollectionBehavior::FullScreenNone);
-            // 普通窗口进不了其他应用的全屏空间。CanJoinAllApplications 才能盖在那个空间上，且不切换桌面。
+            // 普通窗口进不了其他应用的全屏空间；CanJoinAllSpaces + FullScreenAuxiliary +
+            // 高层级才能盖在那个空间上，且不切换桌面。CanJoinAllApplications 已无效，不用。
             behavior.insert(NSWindowCollectionBehavior::CanJoinAllSpaces);
-            behavior.insert(NSWindowCollectionBehavior::CanJoinAllApplications);
             behavior.insert(NSWindowCollectionBehavior::FullScreenAuxiliary);
             behavior.insert(NSWindowCollectionBehavior::Stationary);
             ns_window.setCollectionBehavior(behavior);
