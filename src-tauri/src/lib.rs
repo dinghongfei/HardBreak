@@ -282,6 +282,9 @@ fn start_timer_cycle(app: tauri::AppHandle) {
         // 初始为工作状态
         *state.current_phase.lock().unwrap() = TimerPhase::Work;
 
+        // 显示器自愈计数器：见下方 reconcile 注释
+        let mut reconcile_ticks = 0u64;
+
         loop {
             // 检查是否需要停止
             if !*state.running.lock().unwrap() {
@@ -390,6 +393,17 @@ fn start_timer_cycle(app: tauri::AppHandle) {
                 }
 
                 thread::sleep(Duration::from_secs(1));
+
+                // 显示器热插拔/睡眠唤醒自愈：每 10 秒在主线程核对补齐休息窗。
+                // macOS 上窗口创建必须在主线程，计时线程里创建透明窗会静默失败——
+                // 副屏休眠时启动应用后休息窗不再出现在副屏，就是这个原因。
+                reconcile_ticks += 1;
+                if reconcile_ticks % 10 == 0 {
+                    let app_for_reconcile = app_clone.clone();
+                    let _ = app_clone.run_on_main_thread(move || {
+                        create_break_window_on_all_monitors(&app_for_reconcile);
+                    });
+                }
             }
 
             // 检查是否请求了立即重启（让新时长马上生效）
@@ -630,7 +644,7 @@ fn create_break_window(
     scale: f64,
     visible: bool,
 ) {
-    let _ =
+    let build_result =
         tauri::WebviewWindowBuilder::new(app, label, tauri::WebviewUrl::App("index.html".into()))
             .title("HardBreak")
             .position(position.x as f64, position.y as f64)
@@ -648,6 +662,10 @@ fn create_break_window(
             // 非当前窗口时，第一次点击会只用来激活窗口。打开后单击就能点到跳过。
             .accept_first_mouse(true)
             .build();
+    if build_result.is_err() {
+        // 窗口创建失败意味着对应显示器将没有休息窗，值得留一条日志（正常不应发生）
+        eprintln!("[break] create_break_window {} failed", label);
+    }
 
     if visible {
         if let Some(window) = app.get_webview_window(label) {
@@ -737,23 +755,21 @@ fn macos_screen_frames(app: &tauri::AppHandle) -> Vec<(f64, f64, f64, f64)> {
 
 #[cfg(target_os = "macos")]
 fn show_macos_break_covering_each_screen(app: &tauri::AppHandle) {
-    let frames = macos_screen_frames(app);
-    for (i, _) in frames.iter().enumerate() {
-        let label = format!("{}{}", BREAK_WINDOW_PREFIX, i);
-        if app.get_webview_window(&label).is_none() {
-            create_break_window(
-                app,
-                &label,
-                tauri::PhysicalPosition { x: 0, y: 0 },
-                tauri::PhysicalSize {
-                    width: 800,
-                    height: 600,
-                },
-                1.0,
-                false,
-            );
-        }
+    // 先在主线程同步补齐缺失的休息窗：窗口创建必须在主线程，
+    // 本函数运行在计时线程，直接创建透明窗会静默失败。
+    let (tx, rx) = std::sync::mpsc::sync_channel(1);
+    let app_for_reconcile = app.clone();
+    if app
+        .run_on_main_thread(move || {
+            create_break_window_on_all_monitors(&app_for_reconcile);
+            let _ = tx.send(());
+        })
+        .is_ok()
+    {
+        let _ = rx.recv_timeout(Duration::from_secs(2));
     }
+
+    let frames = macos_screen_frames(app);
 
     let windows: Vec<_> = (0..frames.len())
         .filter_map(|i| app.get_webview_window(&format!("{}{}", BREAK_WINDOW_PREFIX, i)))
