@@ -27,41 +27,49 @@
 
 - 休息倒计时新增数码管样式，圆环和翻页时钟仍可使用，切换后立即生效
 - 休息倒计时新增大字数字和呼吸圆样式，可选样式达到五种
+- 修复圆环倒计时的外圈出现方形边框和漏光
 
 ### zh-TW 繁體中文
 
 - 休息倒數新增數碼管樣式，圓環和翻頁時鐘仍可使用，切換後立即生效
 - 休息倒數新增大字數字和呼吸圓樣式，可選樣式達到五種
+- 修復圓環倒數的外圈出現方形邊框和漏光
 
 ### en English
 
 - LED-digits countdown, alongside the existing ring and flip clock
 - Big-digits and breathing-circle countdowns, bringing five styles in total
+- Fix a square outline and light leak around the ring countdown
 
 ### ja 日本語
 
 - カウントダウンに7セグ表示を追加。円形とめくり時計も引き続き使えます
 - カウントダウンに大きな数字と呼吸サークルを追加。5 種類から選べます
+- 円形カウントダウンの周囲に四角い枠と光漏れが出る問題を修正
 
 ### ko 한국어
 
 - 카운트다운에 LED 숫자 스타일을 추가했습니다. 원형과 플립 시계도 그대로 사용할 수 있습니다
 - 카운트다운에 큰 숫자와 호흡 원 스타일을 추가했습니다. 총 다섯 가지 중 선택할 수 있습니다
+- 원형 카운트다운 주변에 사각형 테두리와 빛샘이 생기던 문제 수정
 
 ### de Deutsch
 
 - Countdown als LED-Ziffern, Ring und Fallblattuhr bleiben verfügbar
 - Countdown als große Ziffern und Atemkreis, jetzt fünf Stile zur Auswahl
+- Behebt einen quadratischen Rahmen und Lichtschein um den Ring-Countdown
 
 ### fr Français
 
 - Compte à rebours en chiffres LED ; l'anneau et l'horloge à volets restent disponibles
 - Compte à rebours en grands chiffres et cercle de respiration, cinq styles au total
+- Corrige un cadre carré et une fuite de lumière autour du compte à rebours en anneau
 
 ### es Español
 
 - Cuenta atrás con dígitos LED; el anillo y el reloj de paletas siguen disponibles
 - Cuenta atrás con dígitos grandes y círculo de respiración, cinco estilos en total
+- Corrige un borde cuadrado y una fuga de luz alrededor de la cuenta atrás en anillo
 
 ---
 

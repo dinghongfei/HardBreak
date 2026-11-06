@@ -130,7 +130,9 @@ body {
 .countdown-circle {
   width: 100%;
   height: 100%;
-  transform: rotate(-90deg);
+  /* 进度弧起点在 12 点由 path 的 d 保证（M 112 22 逆时针一整圈），
+     不要用任何 transform 旋转：透明窗口中 transform 会提升合成层，
+     层背板在圆环外形成方形边框并漏光（macOS WKWebView） */
 }
 /* 圆环进度由 index.js 的 requestAnimationFrame 逐帧驱动，
    不能加 CSS transition：否则每帧的 attribute 更新都会重新触发过渡，画面反而滞后 */
@@ -150,10 +152,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* 字体中冒号以 x 高居中，相对数字偏下；上移使其与数字视觉居中 */
+/* 字体中冒号以 x 高居中，相对数字偏下；上移使其与数字视觉居中。
+   用 position 偏移而不是 transform：避免透明窗口里产生合成层背板 */
 .time-colon {
-  display: inline-block;
-  transform: translateY(-0.08em);
+  position: relative;
+  top: -0.08em;
 }
 
 

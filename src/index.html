@@ -24,10 +24,14 @@
         <!-- 背景圆环 -->
         <svg class="countdown-circle">
           <circle cx="112" cy="112" r="90" stroke="rgba(255,255,255,0.5)" stroke-width="8" fill="none" />
-          <!-- 进度圆环 -->
-          <circle cx="112" cy="112" r="90" stroke="#4ade80" stroke-width="8" fill="none"
-            stroke-dasharray="565.4866776461628" stroke-dashoffset="0" stroke-linecap="round"
-            class="countdown-circle-progress" />
+          <!-- 进度圆环：用从 12 点出发的 path 代替「circle + rotate(-90)」。
+               透明窗口里任何 CSS/SVG transform 都可能把元素提升为合成层，
+               层背板在圆环外形成方形边框并漏光（macOS WKWebView），所以这里零 transform。
+               整圆用两段 180° 弧拼接（圆心被端点唯一确定），不能用起点≈终点的单段弧：
+               那种写法圆心数值上落在别处，弧会整体错位 -->
+          <path d="M 112 22 A 90 90 0 1 0 112 202 A 90 90 0 1 0 112 22" stroke="#4ade80"
+            stroke-width="8" fill="none" stroke-dasharray="565.4866776461628" stroke-dashoffset="0"
+            stroke-linecap="round" class="countdown-circle-progress" />
         </svg>
 
         <!-- 时间文字 -->
