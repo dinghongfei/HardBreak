@@ -2,7 +2,7 @@
 
 应用版本以 `src-tauri/tauri.conf.json` 的 `version` 为准。商店文案不放进 `src/locales.js`。每种语言单独一套，按下面的微软商店字段填写。
 
-新版本写在最上面。开发中的版本只写版本号和各语言的「本版本新增功能」，用一条横线和上一版隔开，这样能看出每个版本开发了哪些功能；提交商店前，再把该版本的完整商店字段补齐成完整一节。已经提交到商店的那一节不要改。
+新版本写在最上面。开发中的版本只写版本号和各语言的「本版本新增功能」，用一条横线和上一版隔开，这样能看出每个版本开发了哪些功能；条目按类型加前缀（中文「新增：/修复：」，其他语言用对应词），顺序是先所有新增、再所有修复；同一主题的变化合并为一条。提交商店前，再把该版本的完整商店字段补齐成完整一节。已经提交到商店的那一节不要改。
 
 产品名用已保留的 **HardBreak**。它已经够短，各语言的短标题都填 HardBreak。
 
@@ -25,67 +25,59 @@
 
 ### zh-CN 简体中文
 
-- 休息倒计时新增数码管样式，圆环和翻页时钟仍可使用，切换后立即生效
-- 休息倒计时新增大字数字和呼吸圆样式，可选样式达到五种
-- 修复圆环倒计时的外圈出现方形边框和漏光
-- 修复副屏睡眠或热插拔后，休息窗只出现在主屏
-- 休息窗支持按 Esc 跳过，不可跳过模式下不生效
+- 新增：休息倒计时数码管、大字数字、呼吸圆三种样式（共五种可选），切换后立即生效
+- 新增：休息窗按 Esc 跳过，不可跳过模式下不生效
+- 修复：圆环倒计时的外圈出现方形边框和漏光
+- 修复：副屏睡眠或热插拔后，休息窗只出现在主屏
 
 ### zh-TW 繁體中文
 
-- 休息倒數新增數碼管樣式，圓環和翻頁時鐘仍可使用，切換後立即生效
-- 休息倒數新增大字數字和呼吸圓樣式，可選樣式達到五種
-- 修復圓環倒數的外圈出現方形邊框和漏光
-- 修復副螢幕睡眠或熱插拔後，休息視窗只出現在主螢幕
-- 休息視窗支援按 Esc 跳過，不可跳過模式下不生效
+- 新增：休息倒數數碼管、大字數字、呼吸圓三種樣式（共五種可選），切換後立即生效
+- 新增：休息視窗按 Esc 跳過，不可跳過模式下不生效
+- 修復：圓環倒數的外圈出現方形邊框和漏光
+- 修復：副螢幕睡眠或熱插拔後，休息視窗只出現在主螢幕
 
 ### en English
 
-- LED-digits countdown, alongside the existing ring and flip clock
-- Big-digits and breathing-circle countdowns, bringing five styles in total
-- Fix a square outline and light leak around the ring countdown
-- Fix break windows covering only the primary display after a secondary display sleeps or is hot-plugged
-- Press Esc in the break window to skip; disabled in no-skip mode
+- Added: three new countdown styles — LED digits, big digits, and breathing circle (five in total), applied immediately
+- Added: press Esc in the break window to skip; disabled in no-skip mode
+- Fixed: square outline and light leak around the ring countdown
+- Fixed: break windows covering only the primary display after a secondary display sleeps or is hot-plugged
 
 ### ja 日本語
 
-- カウントダウンに7セグ表示を追加。円形とめくり時計も引き続き使えます
-- カウントダウンに大きな数字と呼吸サークルを追加。5 種類から選べます
-- 円形カウントダウンの周囲に四角い枠と光漏れが出る問題を修正
-- 副画面のスリープや抜き差しのあと、休憩ウィンドウが主画面にしか表示されない問題を修正
-- 休憩画面で Esc キーを押してスキップできます。スキップ不可モードでは無効です
+- 追加：休憩のカウントダウンに7セグ、大きな数字、呼吸サークルの3種類（全5種類）。切り替えはすぐに反映
+- 追加：休憩画面で Esc キーでスキップ（スキップ不可モードでは無効）
+- 修正：円形カウントダウンの周囲に四角い枠と光漏れが出る問題
+- 修正：副画面のスリープや抜き差しのあと、休憩ウィンドウが主画面にしか表示されない問題
 
 ### ko 한국어
 
-- 카운트다운에 LED 숫자 스타일을 추가했습니다. 원형과 플립 시계도 그대로 사용할 수 있습니다
-- 카운트다운에 큰 숫자와 호흡 원 스타일을 추가했습니다. 총 다섯 가지 중 선택할 수 있습니다
-- 원형 카운트다운 주변에 사각형 테두리와 빛샘이 생기던 문제 수정
-- 보조 화면 절전 또는 hot-plug 후 휴식 창이 주 화면에만 나타나던 문제 수정
-- 휴식 화면에서 Esc 키로 건너뛸 수 있습니다. 건너뛰기 불가 모드에서는 비활성화됩니다
+- 추가: 휴식 카운트다운에 LED 숫자, 큰 숫자, 호흡 원 세 가지 스타일(총 다섯 가지). 바꾸면 바로 적용
+- 추가: 휴식 화면에서 Esc 키로 건너뛰기(건너뛰기 불가 모드에서는 비활성화)
+- 수정: 원형 카운트다운 주변에 사각형 테두리와 빛샘이 생기던 문제
+- 수정: 보조 화면 절전 또는 hot-plug 후 휴식 창이 주 화면에만 나타나던 문제
 
 ### de Deutsch
 
-- Countdown als LED-Ziffern, Ring und Fallblattuhr bleiben verfügbar
-- Countdown als große Ziffern und Atemkreis, jetzt fünf Stile zur Auswahl
-- Behebt einen quadratischen Rahmen und Lichtschein um den Ring-Countdown
-- Behebt: Pausenfenster erschienen nach Ruhezustand oder Hot-Plug eines Zweitbildschirms nur auf dem Hauptbildschirm
-- Pause im Pausenfenster per Esc überspringen; bei Pflichtpause deaktiviert
+- Neu: drei neue Countdown-Stile – LED-Ziffern, große Ziffern und Atemkreis (jetzt fünf zur Auswahl), sofort wirksam
+- Neu: Pause im Pausenfenster per Esc überspringen; bei Pflichtpause deaktiviert
+- Behoben: quadratischer Rahmen und Lichtschein um den Ring-Countdown
+- Behoben: Pausenfenster erschienen nach Ruhezustand oder Hot-Plug eines Zweitbildschirms nur auf dem Hauptbildschirm
 
 ### fr Français
 
-- Compte à rebours en chiffres LED ; l'anneau et l'horloge à volets restent disponibles
-- Compte à rebours en grands chiffres et cercle de respiration, cinq styles au total
-- Corrige un cadre carré et une fuite de lumière autour du compte à rebours en anneau
-- Corrige les fenêtres de pause qui ne couvraient que l'écran principal après une mise en veille ou un branchement à chaud d'un écran secondaire
-- Échap dans la fenêtre de pause pour passer ; désactivé en pause obligatoire
+- Ajout : trois nouveaux styles de compte à rebours — chiffres LED, grands chiffres et cercle de respiration (cinq au total), effet immédiat
+- Ajout : Échap dans la fenêtre de pause pour passer ; désactivé en pause obligatoire
+- Correctif : cadre carré et fuite de lumière autour du compte à rebours en anneau
+- Correctif : fenêtres de pause qui ne couvraient que l'écran principal après une mise en veille ou un branchement à chaud d'un écran secondaire
 
 ### es Español
 
-- Cuenta atrás con dígitos LED; el anillo y el reloj de paletas siguen disponibles
-- Cuenta atrás con dígitos grandes y círculo de respiración, cinco estilos en total
-- Corrige un borde cuadrado y una fuga de luz alrededor de la cuenta atrás en anillo
-- Corrige que las ventanas de descanso cubrieran solo la pantalla principal tras la suspensión o conexión en caliente de una pantalla secundaria
-- Pulsa Esc en la ventana de descanso para saltarlo; desactivado en descanso obligatorio
+- Novedad: tres nuevos estilos de cuenta atrás — dígitos LED, dígitos grandes y círculo de respiración (cinco en total), aplicados al instante
+- Novedad: pulsa Esc en la ventana de descanso para saltarlo; desactivado en descanso obligatorio
+- Corrección: borde cuadrado y fuga de luz alrededor de la cuenta atrás en anillo
+- Corrección: las ventanas de descanso cubrían solo la pantalla principal tras la suspensión o conexión en caliente de una pantalla secundaria
 
 ---
 
